@@ -10,6 +10,8 @@
 
     <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -167,8 +169,8 @@
 <body>
     <div id="root"></div>
 
-    <!-- Base de dados de empresas (arquivo externo) -->
-    <script src="dados.js"></script>
+    <!-- Base de dados via Google Sheets (Drive) -->
+
 
     <script>
         const { useState, useEffect, useMemo } = React;
@@ -270,8 +272,10 @@
             chatInput,
             handleAIMessage,
             setChatInput,
-            showAlertModal
+            showAlertModal,
+            companiesData
         }) => {
+
 
             const handleCompanyClick = (company) => {
                 if (company.link && company.link !== "N/A") {
@@ -364,13 +368,19 @@
 
                 React.createElement("footer", { className: "w-full max-w-4xl mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 opacity-40 hover:opacity-100 transition-opacity" },
                     React.createElement("div", { className: "text-mono" }, "© 2024 AG5 Agency — Strategic Intelligence"),
-                    React.createElement("div", { className: "flex gap-8" },
-                        React.createElement("button", { onClick: () => window.open('https://www.ag5agencia.com.br', '_self'), className: "text-xs uppercase tracking-widest hover:text-green-500 transition-colors" }, "Site Oficial AG5"),
-                        React.createElement("button", { onClick: () => window.open('https://g.co/kgs/QoXq7fK', '_blank'), className: "text-xs uppercase tracking-widest hover:text-green-500 transition-colors" }, "Google AG5")
+                    React.createElement("div", { className: "flex flex-col items-center md:items-end gap-2" },
+                        React.createElement("div", { className: "flex gap-8" },
+                            React.createElement("button", { onClick: () => window.open('https://www.ag5agencia.com.br', '_self'), className: "text-xs uppercase tracking-widest hover:text-green-500 transition-colors" }, "Site Oficial AG5"),
+                            React.createElement("button", { onClick: () => window.open('https://g.co/kgs/QoXq7fK', '_blank'), className: "text-xs uppercase tracking-widest hover:text-green-500 transition-colors" }, "Google AG5")
+                        ),
+                        React.createElement("div", { className: "text-[10px] text-mono text-green-500/50" },
+                            `SINCRO: ${searchResults.length > 0 ? 'BUSCA ATIVA' : 'SISTEMA ONLINE'} / ${companiesData ? companiesData.length : 0} REGISTROS`
+                        )
                     )
                 )
             );
         };
+
 
         const ClientResultsPage = ({ setCurrentPage, appBgColor, showAlertModal }) => {
             return React.createElement("div", { className: "min-h-screen p-4 md:p-6 text-white flex flex-col items-center", style: { backgroundColor: appBgColor } },
@@ -504,6 +514,7 @@
         };
 
         function App() {
+            const [companiesData, setCompaniesData] = useState([]);
             const [currentPage, setCurrentPage] = useState('home');
             const [isChatOpen, setIsChatOpen] = useState(false);
             const [chatMessages, setChatMessages] = useState([]);
@@ -513,6 +524,43 @@
             const [showCompanyDetails, setShowCompanyDetails] = useState(false);
             const [motivationalMessage, setMotivationalMessage] = useState(motivationalQuotes[0]);
             const [modalInfo, setModalInfo] = useState({ isOpen: false, title: '', message: '' });
+
+            useEffect(() => {
+                const SHEET_URL = "https://docs.google.com/spreadsheets/d/1ekgpdgAwFG6UWeRPy1PJfuuXHq23eEloNQ1KrobDWf4/export?format=csv";
+
+                Papa.parse(SHEET_URL, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    transformHeader: (header) => header.replace(/^\ufeff/, "").trim(),
+                    complete: (results) => {
+                        console.log("Planilha carregada:", results.data.length, "itens");
+                        // Mapeamento resiliente para aceitar variações de caixa (Nome, NOME, etc)
+                        const formattedData = results.data.map(item => {
+                            const getVal = (keys) => {
+                                const foundKey = Object.keys(item).find(k => keys.includes(k.trim().toLowerCase()));
+                                return foundKey ? item[foundKey] : "";
+                            };
+
+                            return {
+                                id: getVal(['id']) || Math.random(),
+                                name: getVal(['nome', 'name']),
+                                category: getVal(['categoria', 'category']),
+                                link: getVal(['link']) || "N/A",
+                                keywords: (getVal(['keywords', 'palavras-chave']) || "").split(',').map(k => k.trim()).filter(Boolean)
+                            };
+                        }).filter(item => item.name);
+
+                        setCompaniesData(formattedData);
+                    },
+                    error: (error) => {
+                        console.error("Erro ao carregar planilha:", error);
+                    }
+                });
+            }, []);
+
+
+
 
             const showAlertModal = (title, message) => {
                 setModalInfo({ isOpen: true, title, message });
@@ -560,20 +608,18 @@
             };
 
             const handleSearch = (e) => {
-                const term = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const term = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
                 setSearchTerm(e.target.value);
-                if (term.trim().length > 0) {
-                    const filtered = companiesData.filter(company => {
-                        const companyNameNormalized = company.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                        const companyCategoryNormalized = company.category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\p{L}\p{N}\s]/gu, '').trim();
-                        const companyKeywordsNormalized = company.keywords.map(kw => kw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
 
-                        // Correção: Garante que a pesquisa seja mais específica para a categoria.
-                        // Se o termo de busca estiver nas palavras-chave, verifica se a categoria da empresa também
-                        // é relevante ou se o termo é um nome/categoria direta.
-                        return companyNameNormalized.includes(term) ||
-                            companyCategoryNormalized.includes(term) ||
-                            companyKeywordsNormalized.some(kw => kw.includes(term) || term.includes(kw));
+                if (term.length > 0) {
+                    const filtered = companiesData.filter(company => {
+                        const name = (company.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        const category = (company.category || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        const kws = (company.keywords || []).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+
+                        return name.includes(term) ||
+                            category.includes(term) ||
+                            kws.some(k => k.includes(term));
                     });
                     setSearchResults(filtered);
                     setShowCompanyDetails(true);
@@ -582,6 +628,8 @@
                     setShowCompanyDetails(false);
                 }
             };
+
+
 
             const renderPage = () => {
                 const commonProps = { setCurrentPage, appBgColor, showAlertModal };
@@ -600,8 +648,10 @@
                             chatMessages,
                             chatInput,
                             handleAIMessage,
-                            setChatInput
+                            setChatInput,
+                            companiesData
                         });
+
                     case 'client-results':
                         return React.createElement(ClientResultsPage, commonProps);
                     case 'sales-insights':
@@ -620,8 +670,10 @@
                             chatMessages,
                             chatInput,
                             handleAIMessage,
-                            setChatInput
+                            setChatInput,
+                            companiesData
                         });
+
                 }
             };
 
