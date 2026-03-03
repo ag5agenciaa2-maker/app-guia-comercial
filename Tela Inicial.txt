@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AG5 Gerenciador de Vendas</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+
+    <style>
+        /* Estilos personalizados para a barra de rolagem e inputs */
+        body {
+            font-family: sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #1a1a1a;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #2c2c2c;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4A5568;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #2D3748;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+    const { useState, useEffect, useMemo } = React;
+
+    // Ícone do WhatsApp (SVG)
+    const WhatsAppIcon = () => (
+      React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 24 24", fill: "currentColor" },
+        React.createElement("path", { d: "M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" })
+      )
+    );
+
+    const generateKeywords = (name, categoryDesc, common1, common2, popular1, popular2) => {
+      const stopWords = ['de', 'do', 'da', 'dos', 'das', 'e', 'a', 'o', 'em', 'para', 'com', 'loja', 'serviço', 'serviços', 'para', 'em'];
+      const cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s]/gi, '');
+      const cleanCategory = categoryDesc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\u{1F600}-\u{1F6FF}\u{1F300}-\u{1F5FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FAFF}\u{1F000}-\u{1F02F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+      
+      const nameWords = cleanName.split(/\s+/).filter(Boolean);
+      const categoryWords = cleanCategory.split(/\s+/).filter(Boolean);
+
+      const specificKeywords = [common1, common2, popular1, popular2].filter(Boolean);
+
+      const allWords = [...new Set([...nameWords, ...categoryWords, ...specificKeywords])];
+      return allWords.filter(word => word.length > 2 && !stopWords.includes(word));
+    };
+
+    const companiesData = [
+  { "id": 1, "name": "DJ Materiais", "category": "🧱 Loja de Materiais de Construção", "link": "https://g.co/kgs/giMaijZ", "keywords": ["DJ Materiais", "Loja de Materiais de Construção", "material de obra", "reforma", "construção", "casa"] },
+  { "id": 2, "name": "PP Celulares", "category": "📱 Loja de Celulares", "link": "https://g.co/kgs/d7ECxLY", "keywords": ["PP Celulares", "Loja de Celulares", "celulares", "smartphone", "tecnologia", "eletrônicos"] },
+  { "id": 3, "name": "Bellas Modas", "category": "👗 Loja de Roupas", "link": "N/A", "keywords": ["Bellas Modas", "Loja de Roupas", "moda", "vestuário", "roupa feminina", "tendências"] },
+  { "id": 4, "name": "Moda Carioca", "category": "👕 Loja de Moda Masculina", "link": "N/A", "keywords": ["Moda Carioca", "Loja de Moda Masculina", "moda masculina", "vestuário", "roupa", "estilo"] },
+  { "id": 5, "name": "Vera Modas Fashion - Moda Feminina", "category": "👚 Loja de Moda Feminina", "link": "N/A", "keywords": ["Vera Modas Fashion", "Loja de Moda Feminina", "moda feminina", "roupa", "vestuário", "tendências"] },
+  { "id": 6, "name": "Vera Modas Kids", "category": "👶 Loja Infantil", "link": "N/A", "keywords": ["Vera Modas Kids", "Loja Infantil", "moda infantil", "roupa de criança", "artigos infantis", "brinquedos"] },
+  { "id": 7, "name": "Daytona Auto Center", "category": "🚘 Oficina Mecânica", "link": "N/A", "keywords": ["Daytona Auto Center", "Oficina Mecânica", "mecânica automotiva", "manutenção veicular", "serviços automotivos", "carro"] },
+  { "id": 8, "name": "Angel Feet Calçados", "category": "👟 Loja de Calçados", "link": "N/A", "keywords": ["Angel Feet Calçados", "Loja de Calçados", "sapatos", "tênis", "moda calçados", "conforto"] },
+  { "id": 9, "name": "Ótica Boa Visão", "category": "👓 Ótica", "link": "N/A", "keywords": ["Ótica Boa Visão", "Ótica", "óculos", "lentes", "saúde ocular", "exame de vista"] },
+  { "id": 10, "name": "Matrix Madeiras", "category": "🌳 Madeireira", "link": "N/A", "keywords": ["Matrix Madeiras", "Madeireira", "madeira", "construção", "reforma", "marcenaria"] },
+  { "id": 11, "name": "Auto Peças Vitória", "category": "🚗 Loja de Autopeças", "link": "N/A", "keywords": ["Auto Peças Vitória", "Loja de Autopeças", "peças automotivas", "reposição", "acessórios automotivos", "carro"] },
+  { "id": 12, "name": "Bendita Máquina Uniformes e Bordados", "category": "🧵 Serviço de Bordados / Uniformes", "link": "N/A", "keywords": ["Bendita Máquina", "Serviço de Bordados / Uniformes", "uniformes profissionais", "bordados", "personalização", "confecção"] },
+  { "id": 13, "name": "Auto Peças Cinco Rodas", "category": "🚗 Loja de Autopeças", "link": "N/A", "keywords": ["Auto Peças Cinco Rodas", "Loja de Autopeças", "peças automotivas", "rodas", "reposição", "acessórios para carro"] },
+  { "id": 14, "name": "Ponto Braune Musical - Paciência", "category": "🎼 Loja de Instrumentos Musicais", "link": "N/A", "keywords": ["Ponto Braune Musical", "Loja de Instrumentos Musicais", "instrumentos", "música", "loja de música", "artigos musicais"] },
+  { "id": 15, "name": "Nana Import - Comércio de Artigos Infantis", "category": "👶 Loja de Moda Infantil", "link": "N/A", "keywords": ["Nana Import", "Loja de Moda Infantil", "roupa infantil", "artigos para bebê", "moda para crianças", "importados"] },
+  { "id": 16, "name": "GD CELL", "category": "📱 Loja de Celulares", "link": "N/A", "keywords": ["GD CELL", "Loja de Celulares", "celulares", "smartphone", "tecnologia", "eletrônicos"] },
+  { "id": 17, "name": "VN Imports - Celulares e Acessórios em Geral", "category": "📱 Loja de Celulares / Acessórios", "link": "N/A", "keywords": ["VN Imports", "Loja de Celulares / Acessórios", "celulares", "acessórios para celular", "imports", "tecnologia"] },
+  { "id": 18, "name": "Claudinho Biju", "category": "💍 Joalheria Personalizada", "link": "N/A", "keywords": ["Claudinho Biju", "Joalheria Personalizada", "joias", "bijuterias", "personalizados", "presentes"] },
+  { "id": 19, "name": "CABO LEO ACESSÓRIOS E TABACARIA", "category": "📱 Loja de Celulares / Acessórios e Tabacaria", "link": "N/A", "keywords": ["CABO LEO", "Loja de Celulares / Acessórios e Tabacaria", "acessórios para celular", "tabacaria", "eletrônicos", "conveniência"] },
+  { "id": 20, "name": "O Sol de Kalahari", "category": "🥳 Loja de Artigos para Festas", "link": "N/A", "keywords": ["O Sol de Kalahari", "Loja de Artigos para Festas", "artigos de festa", "decoração", "eventos", "aniversário"] },
+  { "id": 21, "name": "FB Moto Oficina Mecânica", "category": "🏍️ Oficina Mecânica de Motos", "link": "N/A", "keywords": ["FB Moto Oficina Mecânica", "Oficina Mecânica de Motos", "mecânica de motos", "manutenção de motos", "serviços para motos", "moto"] },
+  { "id": 22, "name": "Mobili Art Móveis", "category": "🛋️ Loja de Móveis", "link": "N/A", "keywords": ["Mobili Art Móveis", "Loja de Móveis", "móveis", "decoração", "casa", "design de interiores"] },
+  { "id": 23, "name": "Port Cell Atacadista Comércio de Celulares", "category": "📱 Loja de Celulares (Atacado)", "link": "N/A", "keywords": ["Port Cell Atacadista", "Loja de Celulares (Atacado)", "celulares no atacado", "distribuidor de celular", "revenda", "preços de atacado"] },
+  { "id": 24, "name": "Smartec", "category": "📱 Loja de Celulares", "link": "N/A", "keywords": ["Smartec", "Loja de Celulares", "celulares", "smartphone", "tecnologia", "eletrônicos"] },
+  { "id": 25, "name": "Ótica Algarve", "category": "👓 Ótica", "link": "N/A", "keywords": ["Ótica Algarve", "Ótica", "óculos", "lentes", "saúde ocular", "exame de vista"] },
+  { "id": 26, "name": "Baby Kids Méier", "category": "👶 Loja de Moda Infantil", "link": "N/A", "keywords": ["Baby Kids Méier", "Loja de Moda Infantil", "roupa infantil", "moda bebê", "artigos infantis", "criança"] },
+  { "id": 27, "name": "Babalu Modas", "category": "❌ Permanentemente Fechado", "link": "N/A", "keywords": ["Babalu Modas", "Permanentemente Fechado", "loja de roupas", "moda", "vestuário", "fechado"] },
+  { "id": 28, "name": "Elza Cosméticos", "category": "💅 Loja de Cosméticos", "link": "N/A", "keywords": ["Elza Cosméticos", "Loja de Cosméticos", "maquiagem", "perfumes", "cuidados pessoais", "beleza"] },
+  { "id": 29, "name": "Agita Som", "category": "🔊 Loja de Acessórios Automotivos", "link": "N/A", "keywords": ["Agita Som", "Loja de Acessórios Automotivos", "som automotivo", "acessórios para carro", "equipamentos automotivos", "personalização"] },
+  { "id": 30, "name": "Cleber Baterias", "category": "🔋 Loja de Baterias de Carro", "link": "N/A", "keywords": ["Cleber Baterias", "Loja de Baterias de Carro", "baterias automotivas", "troca de bateria", "bateria veicular", "auto peças"] },
+  { "id": 31, "name": "PALHAÇADA FESTAS", "category": "🎭 Loja de Fantasias / Artigos para Festas", "link": "N/A", "keywords": ["PALHAÇADA FESTAS", "Loja de Fantasias / Artigos para Festas", "fantasias", "artigos de festa", "decoração de eventos", "aluguel de fantasias"] },
+  { "id": 32, "name": "Clínica Odontológica Oral Labor", "category": "🏥 Clínica Odontológica", "link": "N/A", "keywords": ["Clínica Odontológica Oral Labor", "Clínica Odontológica", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 33, "name": "Clínica Dr. Ricardo Siqueira", "category": "🏥 Clínica Odontológica", "link": "N/A", "keywords": ["Clínica Dr. Ricardo Siqueira", "Clínica Odontológica", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 34, "name": "Cresci e Perdi Santa Cruz", "category": "❌ Permanentemente Fechado", "link": "N/A", "keywords": ["Cresci e Perdi Santa Cruz", "Permanentemente Fechado", "brechó", "loja infantil", "roupa usada", "fechado"] },
+  { "id": 35, "name": "Imperio do Açai", "category": "🍓 Açaíteria", "link": "N/A", "keywords": ["Imperio do Açai", "Açaíteria", "açaí", "fast food saudável", "sobremesa", "lanchonete"] },
+  { "id": 36, "name": "OAugusto Smartwatch Campo Grande", "category": "⌚ Loja de Eletrônicos / Smartwatches", "link": "N/A", "keywords": ["OAugusto Smartwatch", "Loja de Eletrônicos / Smartwatches", "smartwatch", "relógios inteligentes", "eletrônicos", "tecnologia"] },
+  { "id": 37, "name": "Santa Cruz Ferragens", "category": "🛠️ Loja de Materiais de Construção / Ferragens", "link": "N/A", "keywords": ["Santa Cruz Ferragens", "Loja de Materiais de Construção / Ferragens", "ferragens", "material de construção", "ferramentas", "reforma"] },
+  { "id": 38, "name": "Leo Eletro - Conserto e Venda", "category": "📱 Oficina de Reparos de Celulares / Venda de Eletrônicos", "link": "N/A", "keywords": ["Leo Eletro", "Oficina de Reparos de Celulares / Venda de Eletrônicos", "conserto de celular", "assistência técnica", "eletrônicos", "venda"] },
+  { "id": 39, "name": "Marreco Atacado & Varejo", "category": "📱 Loja de Celulares (Atacado e Varejo)", "link": "N/A", "keywords": ["Marreco Atacado & Varejo", "Loja de Celulares (Atacado e Varejo)", "celulares atacado", "celulares varejo", "distribuidor", "revenda"] },
+  { "id": 40, "name": "61 Celular", "category": "📱 Loja de Celulares", "link": "N/A", "keywords": ["61 Celular", "Loja de Celulares", "celulares", "smartphone", "tecnologia", "eletrônicos"] },
+  { "id": 41, "name": "Perfil Estúdio de Beleza", "category": "💇‍♀️ Salão de Beleza / Estúdio", "link": "N/A", "keywords": ["Perfil Estúdio de Beleza", "Salão de Beleza / Estúdio", "salão de beleza", "estética", "cuidados pessoais", "beleza"] },
+  { "id": 42, "name": "XIBOCA CELL", "category": "📱 Loja de Celulares", "link": "N/A", "keywords": ["XIBOCA CELL", "Loja de Celulares", "celulares", "smartphone", "tecnologia", "eletrônicos"] },
+  { "id": 43, "name": "VBB Bazar", "category": "👜 Loja de Malas e Bolsas / Bazar", "link": "N/A", "keywords": ["VBB Bazar", "Loja de Malas e Bolsas / Bazar", "malas", "bolsas", "bazar", "artigos diversos"] },
+  { "id": 44, "name": "Conserto CellExpress", "category": "📱 Oficina de Reparos de Celulares", "link": "N/A", "keywords": ["Conserto CellExpress", "Oficina de Reparos de Celulares", "conserto de celular", "assistência técnica", "reparo de smartphone", "serviços de eletrônicos"] },
+  { "id": 45, "name": "Soma Plástico", "category": "🧵 Loja de Tecidos / Plásticos", "link": "N/A", "keywords": ["Soma Plástico", "Loja de Tecidos / Plásticos", "tecidos", "plásticos", "aviamentos", "artesanato"] },
+  { "id": 46, "name": "CM Rei dos iPhones", "category": "📱 Loja de Celulares (Especializada em iPhones)", "link": "N/A", "keywords": ["CM Rei dos iPhones", "Loja de Celulares", "iPhones", "celulares Apple", "smartphones", "tecnologia"] },
+  { "id": 47, "name": "Ótica Nativa", "category": "👓 Ótica", "link": "N/A", "keywords": ["Ótica Nativa", "Ótica", "óculos", "lentes", "saúde ocular", "exame de vista"] },
+  { "id": 48, "name": "Loja de Cosméticos em Campo Grande RJ Studio Mulher Cosméticos", "category": "💅 Loja de Cosméticos", "link": "N/A", "keywords": ["Studio Mulher Cosméticos", "Loja de Cosméticos", "maquiagem", "perfumes", "cuidados pessoais", "beleza"] },
+  { "id": 49, "name": "Bazar Tem Tudo do Bairro", "category": "🛍️ Bazar / Variedades", "link": "N/A", "keywords": ["Bazar Tem Tudo do Bairro", "Bazar / Variedades", "bazar", "utilidades", "presentes", "artigos gerais"] },
+  { "id": 50, "name": "OdontoRiso Dentistas", "category": "🦷 Dentista", "link": "N/A", "keywords": ["OdontoRiso Dentistas", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 51, "name": "Âncora Corretora Campo Grande - RJ", "category": "🛡️ Corretora de Seguros", "link": "N/A", "keywords": ["Âncora Corretora", "Corretora de Seguros", "seguros", "corretagem", "proteção", "finanças"] },
+  { "id": 52, "name": "Ótica Sião", "category": "👓 Ótica", "link": "N/A", "keywords": ["Ótica Sião", "Ótica", "óculos", "lentes", "saúde ocular", "exame de vista"] },
+  { "id": 53, "name": "Jô Tech Import's", "category": "📱 Loja de Celulares / Importados", "link": "N/A", "keywords": ["Jô Tech Import's", "Loja de Celulares / Importados", "celulares importados", "eletrônicos", "tecnologia", "acessórios"] },
+  { "id": 54, "name": "Gráfica e Publicidade Patriota", "category": "🖨️ Gráfica / Publicidade", "link": "N/A", "keywords": ["Gráfica e Publicidade Patriota", "Gráfica / Publicidade", "impressão", "serviços gráficos", "publicidade", "marketing"] },
+  { "id": 55, "name": "Show dos Quadros", "category": "🖼️ Loja de Molduras / Quadros", "link": "N/A", "keywords": ["Show dos Quadros", "Loja de Molduras / Quadros", "quadros", "molduras", "decoração", "arte"] },
+  { "id": 56, "name": "Bia Cell", "category": "📱 Oficina de Reparos de Celulares", "link": "N/A", "keywords": ["Bia Cell", "Oficina de Reparos de Celulares", "conserto de celular", "assistência técnica", "reparo de smartphone", "serviços de eletrônicos"] },
+  { "id": 57, "name": "Mega Cell", "category": "📱 Oficina de Reparos de Celulares", "link": "N/A", "keywords": ["Mega Cell", "Oficina de Reparos de Celulares", "conserto de celular", "assistência técnica", "reparo de smartphone", "serviços de eletrônicos"] },
+  { "id": 58, "name": "Rolo Bom Tintas - Loja de Tintas", "category": "🎨 Loja de Tintas", "link": "N/A", "keywords": ["Rolo Bom Tintas", "Loja de Tintas", "tintas", "pintura", "material de pintura", "decoração"] },
+  { "id": 59, "name": "Dentista Dr Manuel Guedes", "category": "🦷 Dentista", "link": "N/A", "keywords": ["Dr Manuel Guedes", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 60, "name": "Dr. Regis Paiva - Dentista 45", "category": "🦷 Dentista", "link": "N/A", "keywords": ["Dr. Regis Paiva", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 61, "name": "Robinho Rações", "category": "🐾 Loja de Rações", "link": "N/A", "keywords": ["Robinho Rações", "Loja de Rações", "rações", "pet shop", "alimentos para animais", "artigos pet"] },
+  { "id": 62, "name": "Instituto MD - Santa Cruz", "category": "🎓 Centro de Treinamento", "link": "N/A", "keywords": ["Instituto MD Santa Cruz", "Centro de Treinamento", "cursos", "treinamentos", "capacitação profissional", "educação"] },
+  { "id": 63, "name": "Instituto MD - Nova Iguaçu", "category": "🎓 Centro de Treinamento", "link": "N/A", "keywords": ["Instituto MD Nova Iguaçu", "Centro de Treinamento", "cursos", "treinamentos", "capacitação profissional", "educação"] },
+  { "id": 64, "name": "Neemias Bike", "category": "🚲 Loja de Bicicletas", "link": "N/A", "keywords": ["Neemias Bike", "Loja de Bicicletas", "bicicletas", "ciclismo", "manutenção de bicicletas", "acessórios para bicicleta"] },
+  { "id": 65, "name": "Neemias Bike", "category": "🚲 Loja de Bicicletas", "link": "N/A", "keywords": ["Neemias Bike", "Loja de Bicicletas", "bicicletas", "ciclismo", "manutenção de bicicletas", "acessórios para bicicleta"] },
+  { "id": 66, "name": "Rei das Motos Elétricas", "category": "🛵 Loja de Bicicletas Elétricas / Scooters", "link": "N/A", "keywords": ["Rei das Motos Elétricas", "Loja de Bicicletas Elétricas / Scooters", "motos elétricas", "scooters elétricas", "mobilidade elétrica", "veículos elétricos"] },
+  { "id": 67, "name": "Rei das Motos Elétricas - Santíssimo", "category": "🛵 Loja de Bicicletas Elétricas / Scooters", "link": "N/A", "keywords": ["Rei das Motos Elétricas Santíssimo", "Loja de Bicicletas Elétricas / Scooters", "motos elétricas", "scooters elétricas", "mobilidade elétrica", "veículos elétricos"] },
+  { "id": 68, "name": "Rações Menezes", "category": "🐾 Loja de Rações", "link": "N/A", "keywords": ["Rações Menezes", "Loja de Rações", "rações", "pet shop", "alimentos para animais", "artigos pet"] },
+  { "id": 69, "name": "HVM Mecânica 4x4", "category": "🔧 Oficina Mecânica (Especializada em 4x4)", "link": "N/A", "keywords": ["HVM Mecânica 4x4", "Oficina Mecânica 4x4", "mecânica 4x4", "off-road", "manutenção veicular", "serviços automotivos"] },
+  { "id": 70, "name": "Advance - Odontologia Integrada", "category": "🦷 Dentista / Odontologia Integrada", "link": "N/A", "keywords": ["Advance Odontologia Integrada", "Dentista / Odontologia Integrada", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 71, "name": "Ótica Dr. Óculos Elian", "category": "👓 Ótica", "link": "N/A", "keywords": ["Ótica Dr. Óculos Elian", "Ótica", "óculos", "lentes", "saúde ocular", "exame de vista"] },
+  { "id": 72, "name": "CS Locações", "category": "🛠️ Serviço de Locação de Ferramentas", "link": "N/A", "keywords": ["CS Locações", "Serviço de Locação de Ferramentas", "aluguel de ferramentas", "locação de equipamentos", "construção", "reforma"] },
+  { "id": 73, "name": "Cirurgião Dentista Dr André Garcia Sepini", "category": "🦷 Cirurgião Dentista", "link": "N/A", "keywords": ["Dr André Garcia Sepini", "Cirurgião Dentista", "dentista", "cirurgia bucal", "implantes", "odontologia"] },
+  { "id": 74, "name": "Costura Certa", "category": "🧵 Loja de Máquinas de Costura / Atelier de Costura", "link": "N/A", "keywords": ["Costura Certa", "Loja de Máquinas de Costura / Atelier de Costura", "costura", "máquinas de costura", "consertos de roupas", "customização"] },
+  { "id": 75, "name": "WEST IMPORT CELL", "category": "📱 Loja de Acessórios para Dispositivos Móveis", "link": "N/A", "keywords": ["WEST IMPORT CELL", "Loja de Acessórios para Dispositivos Móveis", "acessórios para celular", "capinhas", "carregadores", "fones de ouvido"] },
+  { "id": 76, "name": "Shineray Rio Campo Grande - Motocicletas Elétricas - Scooters - Aluguéis de motocicletas - Moto cc.", "category": "🏍️ Loja de Motocicletas (Elétricas, Scooters, Aluguéis)", "link": "N/A", "keywords": ["Shineray Rio Campo Grande", "Loja de Motocicletas", "motos elétricas", "scooters", "aluguel de motos", "concessionária"] },
+  { "id": 77, "name": "Odonto Carioca Campo Grande", "category": "🦷 Dentista", "link": "N/A", "keywords": ["Odonto Carioca Campo Grande", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 78, "name": "Odonto Carioca Bangu", "category": "🦷 Dentista", "link": "N/A", "keywords": ["Odonto Carioca Bangu", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 79, "name": "Bira Cell", "category": "📱 Loja de Acessórios para Dispositivos Móveis", "link": "N/A", "keywords": ["Bira Cell", "Loja de Acessórios para Dispositivos Móveis", "acessórios para celular", "capinhas", "carregadores", "fones de ouvido"] },
+  { "id": 80, "name": "TONS E CORES TINTAS", "category": "🎨 Loja de Tintas", "link": "N/A", "keywords": ["TONS E CORES TINTAS", "Loja de Tintas", "tintas", "pintura", "material de pintura", "decoração"] },
+  { "id": 81, "name": "Facilidente", "category": "🦷 Dentista", "link": "N/A", "keywords": ["Facilidente", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 82, "name": "Dentista Dr. Eduardo Reis", "category": "🦷 Dentista", "link": "N/A", "keywords": ["Dr. Eduardo Reis", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 83, "name": "Dental e Tal Suprimentos Odontológicos", "category": "🦷 Loja de Produtos Odontológicos", "link": "N/A", "keywords": ["Dental e Tal", "Loja de Produtos Odontológicos", "suprimentos dentários", "material odontológico", "equipamentos", "odontologia"] },
+  { "id": 84, "name": "Rede Home Express", "category": "🧱 Loja de Materiais de Construção", "link": "N/A", "keywords": ["Rede Home Express", "Loja de Materiais de Construção", "material de obra", "reforma", "construção", "casa"] },
+  { "id": 85, "name": "Kanguru's Boliche", "category": "🎳 Restaurante / Boliche", "link": "N/A", "keywords": ["Kanguru's Boliche", "Restaurante / Boliche", "boliche", "diversão", "restaurante", "entretenimento"] },
+  { "id": 86, "name": "Desentupidora Hidro Porto Diadema", "category": "🚰 Desentupidora", "link": "N/A", "keywords": ["Hidro Porto Diadema", "Desentupidora", "desentupimento", "serviços hidráulicos", "encanamento", "limpeza de esgoto"] },
+  { "id": 87, "name": "Marco Alpha Climax Ar condicionado", "category": "❄️ Prestador de Serviços de Climatização", "link": "N/A", "keywords": ["Marco Alpha Climax", "Serviços de Climatização", "ar condicionado", "instalação de ar", "manutenção de ar", "climatização"] },
+  { "id": 88, "name": "WF Gráfica Rápida e Impressão Digital", "category": "🖨️ Gráfica Rápida / Impressão Digital", "link": "N/A", "keywords": ["WF Gráfica Rápida", "Gráfica Rápida / Impressão Digital", "serviços gráficos", "impressão digital", "gráfica", "design gráfico"] },
+  { "id": 89, "name": "Knupp Odontologia - Dra. Manon Knupp", "category": "🦷 Dentista", "link": "N/A", "keywords": ["Dra. Manon Knupp", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 90, "name": "Shineray Recreio", "category": "🏍️ Concessionária de Motocicletas", "link": "N/A", "keywords": ["Shineray Recreio", "Concessionária de Motocicletas", "motos", "shineray", "concessionária", "moto nova"] },
+  { "id": 91, "name": "Shineray Motors Jacarepaguá", "category": "🏍️ Concessionária de Motocicletas", "link": "N/A", "keywords": ["Shineray Motors Jacarepaguá", "Concessionária de Motocicletas", "motos", "shineray", "concessionária", "moto nova"] },
+  { "id": 92, "name": "Recreio Máquinas", "category": "🍴 Loja de Utensílios de Cozinha", "link": "N/A", "keywords": ["Recreio Máquinas", "Loja de Utensílios de Cozinha", "utensílios de cozinha", "equipamentos de cozinha", "panelas", "eletrodomésticos"] },
+  { "id": 93, "name": "Philos Assessoria Contábil", "category": "📊 Assessoria Contábil", "link": "N/A", "keywords": ["Philos Assessoria Contábil", "Assessoria Contábil", "contabilidade", "serviços contábeis", "assessoria", "consultoria"] },
+  { "id": 94, "name": "ITS Odontologia Digital | Paciência", "category": "🦷 Dentista / Odontologia Digital", "link": "N/A", "keywords": ["ITS Odontologia Digital", "Dentista / Odontologia Digital", "odontologia digital", "clínica odontológica", "tratamento dentário", "saúde bucal"] },
+  { "id": 95, "name": "Archipéva Odontologia", "category": "🦷 Dentista", "link": "N/A", "keywords": ["Archipéva Odontologia", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 96, "name": "CF Materiais de Construção", "category": "🧱 Loja de Materiais de Construção", "link": "N/A", "keywords": ["CF Materiais de Construção", "Loja de Materiais de Construção", "material de obra", "reforma", "construção", "casa"] },
+  { "id": 97, "name": "Drenamais Estética e Fisioterapia", "category": "✨ Esteticista / Fisioterapia", "link": "N/A", "keywords": ["Drenamais Estética e Fisioterapia", "Esteticista / Fisioterapia", "estética", "fisioterapia", "bem-estar", "saúde e beleza"] },
+  { "id": 98, "name": "Toca do Leão", "category": "💊 Loja de Vitaminas e Suplementos", "link": "N/A", "keywords": ["Toca do Leão", "Loja de Vitaminas e Suplementos", "vitaminas", "suplementos", "saúde", "bem-estar"] },
+  { "id": 99, "name": "Cabana do Bolo", "category": "🎂 Loja de Bolos", "link": "N/A", "keywords": ["Cabana do Bolo", "Loja de Bolos", "bolos", "confeitaria", "doces", "festa"] },
+  { "id": 100, "name": "Ionete Laços - Boutique de Meninas", "category": "🎀 Artesanato", "link": "N/A", "keywords": ["Ionete Laços", "Artesanato", "laços", "artesanato", "acessórios infantis", "boutique"] },
+  { "id": 101, "name": "Depósito Mini BR", "category": "🍾 Loja de Bebidas", "link": "N/A", "keywords": ["Depósito Mini BR", "Loja de Bebidas", "bebidas", "depósito de bebidas", "cerveja", "refrigerante"] },
+  { "id": 102, "name": "Dadal Auto Mecânica", "category": "🔧 Oficina Mecânica", "link": "N/A", "keywords": ["Dadal Auto Mecânica", "Oficina Mecânica", "mecânica automotiva", "manutenção veicular", "serviços automotivos", "carro"] },
+  { "id": 103, "name": "Rosana Ramos Confeitaria", "category": "🍰 Confeitaria", "link": "N/A", "keywords": ["Rosana Ramos Confeitaria", "Confeitaria", "bolos", "doces", "salgados", "confeitaria artesanal"] },
+  { "id": 104, "name": "BARBEARIA DO ZEZINHO JZ", "category": "💈 Barbearia", "link": "N/A", "keywords": ["BARBEARIA DO ZEZINHO JZ", "Barbearia", "corte de cabelo masculino", "barba", "cabelo e barba", "salão masculino"] },
+  { "id": 105, "name": "Dany's Festas", "category": "🎉 Serviços para Casamento", "link": "N/A", "keywords": ["Dany's Festas", "Serviços para Casamento", "casamento", "eventos", "organização de festas", "buffet"] },
+  { "id": 106, "name": "Nova Odonto Plus", "category": "🦷 Dentista", "link": "N/A", "keywords": ["Nova Odonto Plus", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 107, "name": "FR Dental Clinic", "category": "🦷 Dentista", "link": "N/A", "keywords": ["FR Dental Clinic", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 108, "name": "Material de Construcao Central de Cosmos", "category": "🧱 Loja de Materiais de Construção", "link": "N/A", "keywords": ["Material de Construcao Central de Cosmos", "Loja de Materiais de Construção", "material de obra", "reforma", "construção", "casa"] },
+  { "id": 109, "name": "JM Confeitaria", "category": "🍰 Confeitaria", "link": "N/A", "keywords": ["JM Confeitaria", "Confeitaria", "bolos", "doces", "salgados", "confeitaria artesanal"] },
+  { "id": 110, "name": "Recanto dos Pés", "category": "🦶🏻 Podólogo", "link": "N/A", "keywords": ["Recanto dos Pés", "Podólogo", "podologia", "saúde dos pés", "cuidados com os pés", "tratamento podológico"] },
+  { "id": 111, "name": "Facilita Multas e Recursos", "category": "👩‍⚖️ Assistência Jurídica", "link": "N/A", "keywords": ["Facilita Multas e Recursos", "Assistência Jurídica", "recurso de multa", "direito de trânsito", "advocacia", "serviços jurídicos"] },
+  { "id": 112, "name": "Wan Dall Jóias", "category": "💎 Joalheria", "link": "N/A", "keywords": ["Wan Dall Jóias", "Joalheria", "joias", "ouro", "prata", "acessórios de luxo"] },
+  { "id": 113, "name": "Clínica Vitallis", "category": "🏥 Clínica Odontológica", "link": "N/A", "keywords": ["Clínica Vitallis", "Clínica Odontológica", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 114, "name": "Dogdal Rações na Brisa - Rações para Animais - Farmácia Veterinária - Materiais de Pesca", "category": "🐾 Loja de Rações / Pet Shop", "link": "N/A", "keywords": ["Dogdal Rações na Brisa", "Loja de Rações / Pet Shop", "rações", "pet shop", "farmácia veterinária", "artigos pet"] },
+  { "id": 115, "name": "Dogdal Rações em Inhoaíba - Rações para Animais - Farmácia Veterinária - Materiais de Pesca", "category": "🐾 Loja de Rações / Pet Shop", "link": "N/A", "keywords": ["Dogdal Rações em Inhoaíba", "Loja de Rações / Pet Shop", "rações", "pet shop", "farmácia veterinária", "artigos pet"] },
+  { "id": 116, "name": "Albuquerque e Lima - Advocacia Previdenciária - Estrada do Campinho", "category": "🧑‍⚖️ Advogado Previdenciário", "link": "N/A", "keywords": ["Albuquerque e Lima", "Advocacia Previdenciária", "advogado", "direito previdenciário", "aposentadoria", "serviços jurídicos"] },
+  { "id": 117, "name": "Leonardo Alves Dentista - L.A Odontologia", "category": "🏥 Clínica Odontológica", "link": "N/A", "keywords": ["Leonardo Alves Dentista", "Clínica Odontológica", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 118, "name": "L.A Leonardo Alves Odontologia Avançada", "category": "🏥 Clínica Odontológica", "link": "N/A", "keywords": ["L.A Leonardo Alves Odontologia Avançada", "Clínica Odontológica", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 119, "name": "pet shop CAT & DOG-RECREIO", "category": "🐶 Pet Shop", "link": "N/A", "keywords": ["pet shop CAT & DOG-RECREIO", "Pet Shop", "banho e tosa", "acessórios para pets", "clínica veterinária", "cuidados pet"] },
+  { "id": 120, "name": "Sampaio Imóveis", "category": "🏠 Imobiliária", "link": "N/A", "keywords": ["Sampaio Imóveis", "Imobiliária", "imóveis", "aluguel", "venda", "corretagem"] },
+  { "id": 121, "name": "SV Motos Tijuca", "category": "🏍️ Concessionária de Motocicletas", "link": "N/A", "keywords": ["SV Motos Tijuca", "Concessionária de Motocicletas", "motos", "concessionária", "moto nova", "moto usada"] },
+  { "id": 122, "name": "CACHO ESSENCIAL INSTITUTO DE BELEZA E TERAPIA CAPILAR", "category": "💇‍♀️ Salão de Beleza / Terapia Capilar", "link": "N/A", "keywords": ["CACHO ESSENCIAL", "Salão de Beleza / Terapia Capilar", "salão de beleza", "terapia capilar", "cabelos", "beleza"] },
+  { "id": 123, "name": "Kengão Material de Construção", "category": "🧱 Loja de Materiais de Construção", "link": "N/A", "keywords": ["Kengão Material de Construção", "Loja de Materiais de Construção", "material de obra", "reforma", "construção", "casa"] },
+  { "id": 124, "name": "Eskimó Sorvetes Sepetiba", "category": "🍦 Sorveteria", "link": "N/A", "keywords": ["Eskimó Sorvetes Sepetiba", "Sorveteria", "sorvetes", "gelateria", "sobremesas", "doces"] },
+  { "id": 125, "name": "GRICS Rodrigues Advocacia", "category": "🧑‍⚖️ Advogado Previdenciário", "link": "N/A", "keywords": ["GRICS Rodrigues Advocacia", "Advogado Previdenciário", "advogado", "direito previdenciário", "aposentadoria", "serviços jurídicos"] },
+  { "id": 126, "name": "Aviário Central do Monteiro", "category": "🥩 Açougue / Aviário", "link": "N/A", "keywords": ["Aviário Central do Monteiro", "Açougue / Aviário", "carnes", "frangos", "açougue", "produtos frescos"] },
+  { "id": 127, "name": "Nayara Ribeiro - Advogado(a) de Usucapião, Inventário, Divórcio e Regularização Imobiliária - Campo Grande/RJ - Zona Oeste", "category": "👩‍⚖️ Advogado", "link": "N/A", "keywords": ["Nayara Ribeiro", "Advogado", "advocacia", "serviços jurídicos", "direito imobiliário", "família"] },
+  { "id": 128, "name": "Dra.Keila Cabral | Clinica odontologica | Cirurgião Dentista | Paciência", "category": "🏥 Clínica Odontológica / Cirurgião Dentista", "link": "N/A", "keywords": ["Dra.Keila Cabral", "Clínica Odontológica / Cirurgião Dentista", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 129, "name": "Luma Gás Campo Grande RJ", "category": "⛽ Centro de Instalação de GNV para Automóveis", "link": "N/A", "keywords": ["Luma Gás Campo Grande RJ", "Centro de Instalação de GNV", "gnv", "gás veicular", "instalação", "conversão"] },
+  { "id": 130, "name": "Massoterapia E Estética - Dora Freitas", "category": "💆‍♀️ Massoterapeuta / Estética", "link": "N/A", "keywords": ["Dora Freitas", "Massoterapeuta / Estética", "massagem", "estética corporal", "bem-estar", "relaxamento"] },
+  { "id": 131, "name": "Ana Nunes Estética e Beleza", "category": "✨ Centro de Saúde e Beleza", "link": "N/A", "keywords": ["Ana Nunes Estética e Beleza", "Centro de Saúde e Beleza", "estética", "beleza", "cuidados pessoais", "bem-estar"] },
+  { "id": 132, "name": "SM Soluções e Montagens", "category": "🛠️ Reformas / Montagens", "link": "N/A", "keywords": ["SM Soluções e Montagens", "Reformas / Montagens", "reformas", "montagens", "serviços de construção", "manutenção"] },
+  { "id": 133, "name": "Douglas Almeida - Óculos a Preço Justo", "category": "👓 Ótica", "link": "N/A", "keywords": ["Douglas Almeida", "Ótica", "óculos", "lentes", "saúde ocular", "exame de vista"] },
+  { "id": 134, "name": "Rufino Advocacia", "category": "⚖️ Escritório de Advocacia", "link": "N/A", "keywords": ["Rufino Advocacia", "Escritório de Advocacia", "advocacia", "serviços jurídicos", "direito", "consultoria jurídica"] },
+  { "id": 135, "name": "Rufino Engenharia", "category": "👷 Engenharia", "link": "N/A", "keywords": ["Rufino Engenharia", "Engenharia", "serviços de engenharia", "projetos", "construção", "consultoria"] },
+  { "id": 136, "name": "SINALIZA LOCADORA DE MOTOS", "category": "🏍️ Concessionária de Motocicletas / Locadora", "link": "N/A", "keywords": ["SINALIZA LOCADORA DE MOTOS", "Concessionária de Motocicletas / Locadora", "aluguel de motos", "motos", "locação", "concessionária"] },
+  { "id": 137, "name": "SV AUTOMÓVEIS", "category": "🚘 Concessionária de Automóveis", "link": "N/A", "keywords": ["SV AUTOMÓVEIS", "Concessionária de Automóveis", "carros", "veículos", "concessionária", "venda de carros"] },
+  { "id": 138, "name": "SÓ Multas Paciência", "category": "📄 Serviços Administrativos", "link": "N/A", "keywords": ["SÓ Multas Paciência", "Serviços Administrativos", "recurso de multas", "despachante", "documentação", "serviços burocráticos"] },
+  { "id": 139, "name": "df Despachante", "category": "✍️ Despachante", "link": "N/A", "keywords": ["df Despachante", "Despachante", "documentação veicular", "licenciamento", "transferência", "serviços de despachante"] },
+  { "id": 140, "name": "Rota 22 - Estúdio de Tatuagem e Piercing", "category": "🎨 Estúdio de Tatuagem e Colocação de Piercing", "link": "N/A", "keywords": ["Rota 22", "Estúdio de Tatuagem e Piercing", "tatuagem", "piercing", "body art", "arte corporal"] },
+  { "id": 141, "name": "Randow Smart", "category": "📱 Loja de Eletrônicos", "link": "N/A", "keywords": ["Randow Smart", "Loja de Eletrônicos", "eletrônicos", "tecnologia", "gadgets", "dispositivos"] },
+  { "id": 142, "name": "ÓTICA VER BEM", "category": "👓 Ótica", "link": "N/A", "keywords": ["ÓTICA VER BEM", "Ótica", "óculos", "lentes", "saúde ocular", "exame de vista"] },
+  { "id": 143, "name": "Refeições da Renata", "category": "🍽️ Restaurante", "link": "N/A", "keywords": ["Refeições da Renata", "Restaurante", "refeições", "comida caseira", "almoço", "jantar"] },
+  { "id": 144, "name": "Robcell Point dos Acessórios", "category": "📱 Loja de Celulares / Acessórios", "link": "N/A", "keywords": ["Robcell Point dos Acessórios", "Loja de Celulares / Acessórios", "acessórios para celular", "capinhas", "carregadores", "fones de ouvido"] },
+  { "id": 145, "name": "Robcell Consertos em Geral", "category": "📱 Oficina de Conserto de Eletrônicos", "link": "N/A", "keywords": ["Robcell Consertos em Geral", "Oficina de Conserto de Eletrônicos", "conserto de eletrônicos", "assistência técnica", "reparo de dispositivos", "manutenção"] },
+  { "id": 146, "name": "Casa Colibri Espaço Infantil", "category": "👧 Pré-escola / Espaço Infantil", "link": "N/A", "keywords": ["Casa Colibri", "Pré-escola / Espaço Infantil", "educação infantil", "creche", "recreação", "desenvolvimento infantil"] },
+  { "id": 147, "name": "CMN Auto Center - Oficina Mecânica Campo Grande RJ", "category": "🔧 Oficina Mecânica / Auto Center", "link": "N/A", "keywords": ["CMN Auto Center", "Oficina Mecânica / Auto Center", "mecânica automotiva", "manutenção veicular", "serviços automotivos", "carro"] },
+  { "id": 148, "name": "Clínica Odontológica Sorria Penha (unidade Recreio)", "category": "🏥 Clínica Odontológica", "link": "N/A", "keywords": ["Clínica Odontológica Sorria Penha", "Clínica Odontológica", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 149, "name": "MUSCLE FIT", "category": "🏋️ Academia", "link": "N/A", "keywords": ["MUSCLE FIT", "Academia", "treino", "fitness", "musculação", "saúde e bem-estar"] },
+  { "id": 150, "name": "Casa Maçã", "category": "📱 Loja de Celulares", "link": "N/A", "keywords": ["Casa Maçã", "Loja de Celulares", "celulares", "smartphone", "tecnologia", "eletrônicos"] },
+  { "id": 151, "name": "Sorriclinica Dentistas", "category": "🦷 Dentista", "link": "https://g.co/kgs/BYtrPvn", "keywords": ["Sorriclinica Dentistas", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 152, "name": "Clínica Gustavo Martins - Especialista em Face", "category": "👨‍⚕️ Cirurgião Dentista / Especialista em Face", "link": "https://g.co/kgs/KWjsU22", "keywords": ["Clínica Gustavo Martins", "Cirurgião Dentista / Especialista em Face", "cirurgia facial", "dentista", "estética facial", "odontologia"] },
+  { "id": 153, "name": "Vai de Boa Tecnologia", "category": "💻 Tecnologia", "link": "N/A", "keywords": ["Vai de Boa Tecnologia", "Tecnologia", "soluções em TI", "consultoria em tecnologia", "desenvolvimento", "inovação"] },
+  { "id": 154, "name": "Dentista em Campo Grande RJ - LC Odontologia e Medicina Integrada", "category": "🦷 Dentista / Clínica Odontológica", "link": "N/A", "keywords": ["LC Odontologia e Medicina Integrada", "Dentista / Clínica Odontológica", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 155, "name": "Alca2C", "category": "💻 Tecnologia", "link": "N/A", "keywords": ["Alca2C", "Tecnologia", "soluções em TI", "consultoria em tecnologia", "desenvolvimento", "inovação"] },
+  { "id": 156, "name": "Bons Vizinhos Tintas e Material de Construção", "category": "🧱 Loja de Tintas e Materiais de Construção", "link": "N/A", "keywords": ["Bons Vizinhos Tintas e Material de Construção", "Loja de Tintas e Materiais de Construção", "tintas", "material de construção", "reforma", "casa"] },
+  { "id": 157, "name": "Monobloco Serviços Automotivos", "category": "🔧 Oficina Mecânica", "link": "N/A", "keywords": ["Monobloco Serviços Automotivos", "Oficina Mecânica", "mecânica automotiva", "manutenção veicular", "serviços automotivos", "carro"] },
+  { "id": 158, "name": "Personalle Espaço de Beleza", "category": "💇‍♀️ Salão de Beleza / Estética", "link": "N/A", "keywords": ["Personalle Espaço de Beleza", "Salão de Beleza / Estética", "salão de beleza", "estética", "cuidados pessoais", "beleza"] },
+  { "id": 159, "name": "Bar Boa Praça", "category": "🍻 Bar / Restaurante", "link": "N/A", "keywords": ["Bar Boa Praça", "Bar / Restaurante", "bar", "restaurante", "comida", "bebidas"] },
+  { "id": 160, "name": "HP Consultoria", "category": "📊 Consultoria Financeira", "link": "N/A", "keywords": ["HP Consultoria", "Consultoria Financeira", "consultoria", "finanças", "negócios", "planejamento"] },
+  { "id": 161, "name": "Amor Perfeito - Bebê Reborn", "category": "🧸 Loja de Bonecas", "link": "N/A", "keywords": ["Amor Perfeito", "Loja de Bonecas", "bonecas", "bebê reborn", "brinquedos", "colecionáveis"] },
+  { "id": 162, "name": "Centro Odontológico Dra. Leila Márcia", "category": "🏥 Clínica Odontológica", "link": "N/A", "keywords": ["Dra. Leila Márcia", "Clínica Odontológica", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 163, "name": "Auto Escola Heringer", "category": "🚗 Auto Escola", "link": "https://g.co/kgs/cpfBJ9v", "keywords": ["Auto Escola Heringer", "Auto Escola", "carteira de motorista", "aulas de direção", "habilitação", "primeira habilitação"] },
+  { "id": 164, "name": "Albuquerque e Lima - Advocacia Previdenciária - Campo Grande", "category": "⚖️ Serviços Jurídicos / Advocacia", "link": "https://g.co/kgs/vqm8Gg4", "keywords": ["Albuquerque e Lima", "Serviços Jurídicos / Advocacia", "advocacia", "direito", "serviços jurídicos", "consultoria jurídica"] },
+  { "id": 165, "name": "Ponto Braune Musical - Santa Cruz", "category": "🎼 Loja de Instrumentos Musicais", "link": "https://g.co/kgs/rLyP9sP", "keywords": ["Ponto Braune Musical", "Loja de Instrumentos Musicais", "instrumentos", "música", "loja de música", "artigos musicais"] },
+  { "id": 166, "name": "RioUp! Imóveis", "category": "🏠 Imobiliária", "link": "https://g.co/kgs/jvY9jXY", "keywords": ["RioUp! Imóveis", "Imobiliária", "imóveis", "aluguel", "venda", "corretagem"] },
+  { "id": 167, "name": "Recanto dos Pés Bangu", "category": "🦶🏻 Podólogo", "link": "https://g.co/kgs/GgidNYM", "keywords": ["Recanto dos Pés Bangu", "Podólogo", "podologia", "saúde dos pés", "cuidados com os pés", "tratamento podológico"] },
+  { "id": 168, "name": "Nhoque da Vânia", "category": "🍝 Loja de Massas", "link": "https://g.co/kgs/xev2X9E", "keywords": ["Nhoque da Vânia", "Loja de Massas", "massas", "culinária italiana", "comida", "refeições"] },
+  { "id": 169, "name": "Jardim Do Éden", "category": "💐 Floricultura", "link": "Jardim Do Éden", "keywords": ["Jardim Do Éden", "Floricultura", "flores", "plantas", "arranjos", "jardinagem"] },
+  { "id": 170, "name": "Miss Esmalteria e Beleza", "category": "💇‍♀️ Salão de Beleza / Estética / Esmalteria", "link": "https://g.co/kgs/CaM41c7", "keywords": ["Miss Esmalteria e Beleza", "Salão de Beleza / Estética / Esmalteria", "salão de beleza", "esmaltaria", "estética", "manicure"] },
+  { "id": 171, "name": "Relojoeiro em Cosmo (Edgar)", "category": "⌚ Relojoeiro", "link": "https://g.co/kgs/o2Mf2EV", "keywords": ["Relojoeiro em Cosmo", "Relojoeiro", "conserto de relógios", "relógios", "joias", "baterias"] },
+  { "id": 172, "name": "Auto Escola Premium", "category": "🚗 Auto Escola", "link": "https://g.co/kgs/wMrdrcv", "keywords": ["Auto Escola Premium", "Auto Escola", "carteira de motorista", "aulas de direção", "habilitação", "primeira habilitação"] },
+  { "id": 173, "name": "Abratec Serviços Automotivos", "category": "🚘 Oficina Mecânica / Auto Center", "link": "https://g.co/kgs/GXVUvff", "keywords": ["Abratec Serviços Automotivos", "Oficina Mecânica / Auto Center", "mecânica automotiva", "manutenção veicular", "serviços automotivos", "carro"] },
+  { "id": 174, "name": "Confiança Assessoria Imobiliária LTDA", "category": "🏠 Imobiliária", "link": "https://g.co/kgs/AQx5mCV", "keywords": ["Confiança Assessoria Imobiliária LTDA", "Imobiliária", "imóveis", "aluguel", "venda", "corretagem"] },
+  { "id": 175, "name": "MR AUTOMOTIVOS - AUTO ELÉTRICA", "category": "🚘 Oficina Mecânica / Auto Center", "link": "https://g.co/kgs/Vx2DwnE", "keywords": ["MR AUTOMOTIVOS", "Oficina Mecânica / Auto Center", "mecânica automotiva", "auto elétrica", "manutenção veicular", "serviços automotivos"] },
+  { "id": 176, "name": "Veterinária Paciência", "category": "🐾 Veterinário", "link": "https://g.co/kgs/UvT7hJr", "keywords": ["Veterinária Paciência", "Veterinário", "clínica veterinária", "saúde animal", "atendimento pet", "vacinação"] },
+  { "id": 177, "name": "Atlantic Soluções", "category": "🏗️ Engenharia / Construção / Reformas / Montagens", "link": "https://g.co/kgs/BtnHfJr", "keywords": ["Atlantic Soluções", "Engenharia / Construção / Reformas / Montagens", "engenharia civil", "construção", "reformas", "projetos"] },
+  { "id": 178, "name": "Avant Negócios Imobiliários", "category": "🏠 Imobiliária", "link": "https://g.co/kgs/V3n24ok", "keywords": ["Avant Negócios Imobiliários", "Imobiliária", "imóveis", "aluguel", "venda", "corretagem"] },
+  { "id": 179, "name": "Cathal Produtos e Serviços", "category": "🧴 Produtos de Limpeza e Utilidades", "link": "https://g.co/kgs/wr77CBX", "keywords": ["Cathal Produtos e Serviços", "Produtos de Limpeza e Utilidades", "limpeza", "utilidades domésticas", "produtos de limpeza", "casa"] },
+  { "id": 180, "name": "Gauchão Madeiras", "category": "🌳 Madeireira", "link": "https://g.co/kgs/XjBGwrZ", "keywords": ["Gauchão Madeiras", "Madeireira", "madeira", "construção", "reforma", "marcenaria"] },
+  { "id": 181, "name": "Oral Imagem - Campo Grande RJ", "category": "🏥 Clínica Odontológica / Dentistas", "link": "https://g.co/kgs/Pf3SbRJ", "keywords": ["Oral Imagem", "Clínica Odontológica / Dentistas", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 182, "name": "Clinica Cher", "category": "🏥 Clínica Odontológica / Dentistas", "link": "https://g.co/kgs/oSSPq3n", "keywords": ["Clinica Cher", "Clínica Odontológica / Dentistas", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 183, "name": "A&L Conceito Automotivo", "category": "🚘 Oficina Mecânica / Auto Center", "link": "https://g.co/kgs/a4Z8m9M", "keywords": ["A&L Conceito Automotivo", "Oficina Mecânica / Auto Center", "mecânica automotiva", "manutenção veicular", "serviços automotivos", "carro"] },
+  { "id": 184, "name": "Restaurante Espeto Gaúcho - Rua Aurélio", "category": "🍽️ Restaurante", "link": "https://g.co/kgs/UgLfFfq", "keywords": ["Restaurante Espeto Gaúcho", "Restaurante", "comida", "refeições", "culinária", "gastronomia"] },
+  { "id": 185, "name": "Sr. CAFEZIN", "category": "☕ Cafeteria", "link": "https://g.co/kgs/9uGiWjN", "keywords": ["Sr. CAFEZIN", "Cafeteria", "café", "cafeteria", "lanchonete", "bebidas"] },
+  { "id": 186, "name": "Elseg Equipamentos", "category": "🛠️ Loja de Equipamentos", "link": "https://g.co/kgs/3V6qFzE", "keywords": ["Elseg Equipamentos", "Loja de Equipamentos", "equipamentos", "ferramentas", "máquinas", "manutenção"] },
+  { "id": 187, "name": "Rancho Café na Roça", "category": "☕ Cafeteria", "link": "https://g.co/kgs/NDM3LYh", "keywords": ["Rancho Café na Roça", "Cafeteria", "café", "cafeteria", "lanchonete", "bebidas"] },
+  { "id": 188, "name": "Dental Clean - Sepetiba", "category": "🏥 Clínica Odontológica / Dentistas", "link": "https://g.co/kgs/zmNGswY", "keywords": ["Dental Clean", "Clínica Odontológica / Dentistas", "dentista", "tratamento dentário", "saúde bucal", "odontologia"] },
+  { "id": 189, "name": "Four Patinhas Veterinária", "category": "🐾 Veterinário", "link": "https://g.co/kgs/pS1CKdt", "keywords": ["Four Patinhas Veterinária", "Veterinário", "clínica veterinária", "saúde animal", "atendimento pet", "vacinação"] },
+  { "id": 190, "name": "Réglicred Empréstimo - São Cristóvão", "category": "💰 Agência de Empréstimos no Rio de Janeiro", "link": "https://g.co/kgs/RXTCssv", "keywords": ["Réglicred Empréstimo", "Agência de Empréstimos", "empréstimos", "crédito", "financiamento", "serviços financeiros"] },
+  { "id": 191, "name": "Serralheria e Vidraçaria M.A - Campo Grande RJ", "category": "🔨 Serralheria e Vidraçaria", "link": "https://g.co/kgs/WWr8Kyh", "keywords": ["Serralheria e Vidraçaria M.A", "Serralheria e Vidraçaria", "serralheria", "vidraçaria", "portões", "esquadrias"] },
+  { "id": 192, "name": "OAugusto Smartwatch Iaraquã", "category": "📱 Loja de Celulares / Acessórios de Celulares", "link": "https://g.co/kgs/SQgj6tk", "keywords": ["OAugusto Smartwatch", "Loja de Celulares / Acessórios de Celulares", "celulares", "acessórios para celular", "smartwatch", "eletrônicos"] },
+  { "id": 193, "name": "Curso Mourão", "category": "📚 Cursos", "link": "https://g.co/kgs/3ed5kF8", "keywords": ["Curso Mourão", "Cursos", "educação", "ensino", "capacitação profissional", "aulas"] },
+  { "id": 194, "name": "Virtus Celular - Cosmos RJ", "category": "📱 Loja de Celulares / Acessórios de Celulares", "link": "https://g.co/kgs/uDVWLXj", "keywords": ["Virtus Celular", "Loja de Celulares / Acessórios de Celulares", "celulares", "acessórios para celular", "smartphones", "eletrônicos"] },
+  { "id": 195, "name": "Jonathan Pneus | Borracharia 24h (R.Prof. Gonçalves)", "category": "🛞 Borracharia", "link": "https://g.co/kgs/6FWUQyP", "keywords": ["Jonathan Pneus", "Borracharia", "pneus", "borracharia 24h", "conserto de pneu", "alinhamento"] },
+  { "id": 196, "name": "Grande Rio Pneus", "category": "🛠️ Mecânica para Carros", "link": "https://g.co/kgs/UfYoJNj", "keywords": ["Grande Rio Pneus", "Mecânica para Carros", "mecânica automotiva", "pneus", "manutenção veicular", "serviços automotivos"] },
+  { "id": 197, "name": "Iluminare Elétrica", "category": "💡 Loja de Iluminação", "link": "https://g.co/kgs/ZYKix1c", "keywords": ["Iluminare Elétrica", "Loja de Iluminação", "iluminação", "materiais elétricos", "luminárias", "decoração"] },
+  { "id": 198, "name": "#244 Moto Peças e Oficina de Moto", "category": "🏍️ Loja de Peças para Motocicletas", "link": "https://g.co/kgs/UYbTiZf", "keywords": ["244 Moto Peças", "Loja de Peças para Motocicletas", "peças de moto", "acessórios para moto", "oficina de moto", "manutenção de motos"] },
+  { "id": 199, "name": "MotoChefe - Campo Grande", "category": "🛵 Concessionária de Scooters Elétricas", "link": "https://g.co/kgs/Z2GHkxT", "keywords": ["MotoChefe", "Concessionária de Scooters Elétricas", "scooters elétricas", "motos elétricas", "mobilidade elétrica", "concessionária"] },
+  { "id": 200, "name": "Bilha Motos", "category": "🏍️ Loja de Peças para Motocicletas", "link": "https://g.co/kgs/42QbF49", "keywords": ["Bilha Motos", "Loja de Peças para Motocicletas", "peças de moto", "acessórios para moto", "oficina de moto", "manutenção de motos"] },
+  { "id": 201, "name": "Ótica Moulin - Santa Cruz", "category": "🕶️ Óticas", "link": "https://g.co/kgs/Eh4tRWU", "keywords": ["Ótica Moulin", "Óticas", "óculos", "lentes", "saúde ocular", "exame de vista"] },
+  { "id": 202, "name": "Spidd Motos - Campo Grande RJ", "category": "🔧 Oficina Mecânica de Motos", "link": "Oficina mecânica de motos", "keywords": ["Spidd Motos", "Oficina Mecânica de Motos", "mecânica de motos", "manutenção de motos", "serviços para motos", "moto"] },
+  { "id": 203, "name": "Ótica Vilage", "category": "👓 Ótica", "link": "https://share.google/Ges515BV7KIxAX07H", "keywords": ["Ótica Vilage", "Ótica", "óculos", "lentes", "saúde ocular", "exame de vista"] },
+  { "id": 204, "name": "Mallu Móveis | Móveis para Salão de Beleza", "category": "🛋️ Loja de móveis", "link": "https://share.google/3Axt3DxrLwOfpFb4O", "keywords": ["Mallu Móveis", "Loja de móveis", "móveis para salão de beleza", "móveis", "decoração", "mobiliário"] },
+  { "id": 205, "name": "Lu do Piercing", "category": "🎨 Estúdio de tatuagem e colocação de piercing", "link": "https://share.google/EHpfwdaFg2PzNcpRl", "keywords": ["Lu do Piercing", "Estúdio de tatuagem e colocação de piercing", "piercing", "body art", "joias corporais", "perfuração"] },
+  { "id": 206, "name": "Jonathan Pneus | Borracharia 24h (Cachamorra)", "category": "🛞 Borracharia", "link": "https://share.google/fKn8Xqy0TTDLEaxrj", "keywords": ["Jonathan Pneus", "Borracharia", "pneus", "borracharia 24h", "conserto de pneu", "alinhamento"] },
+  { "id": 207, "name": "DNA Kids Moda Baby e Infantil", "category": "👶 Loja de moda infantil", "link": "https://share.google/8AiqDm0n9KAmewm3n", "keywords": ["DNA Kids Moda Baby e Infantil", "Loja de moda infantil", "roupas infantis", "moda bebê", "vestuário infantil", "loja de roupas"] },
+  { "id": 208, "name": "DL Kids", "category": "👶 Loja de moda infantil", "link": "https://share.google/B4o92LFxO3wtd1UuL", "keywords": ["DL Kids", "Loja de moda infantil", "roupas infantis", "moda bebê", "vestuário infantil", "loja de roupas"] },
+  { "id": 209, "name": "Bruno Ink Estúdio de Tatuagem", "category": "🎨 Estúdio de tatuagem e colocação de piercing", "link": "https://g.co/kgs/YJNTM97", "keywords": ["Bruno Ink Estúdio de Tatuagem", "Estúdio de tatuagem e colocação de piercing", "tatuagem", "body art", "arte corporal", "tatuador"] },
+  { "id": 210, "name": "Vip Motos", "category": "🏍️ Oficina e Peças para Motocicletas", "link": "https://share.google/64WnunOuZQ5UYDr6Y", "keywords": ["Vip Motos", "Oficina e Peças para Motocicletas", "oficina de moto", "peças de moto", "conserto de moto", "manutenção de motos"] },
+  { "id": 211, "name": "Zezinho Pneus", "category": "🛠️ Mecânica para Carros", "link": "https://share.google/A1wcNSjLKEE4roWml", "keywords": ["Zezinho Pneus", "Mecânica para Carros", "mecânica automotiva", "pneus", "manutenção veicular", "serviços automotivos"] },
+  { "id": 212, "name": "Peixaria do Julinho", "category": "🐟 Peixaria", "link": "https://g.co/kgs/hWyj91C", "keywords": ["Peixaria do Julinho", "Peixaria", "peixe", "frutos do mar", "alimentos", "comida"] },
+  { "id": 213, "name": "Dra Lilian Quintanilha", "category": "🦷 Dentista", "link": "https://share.google/64WnunOuZQ5UYDr6Y", "keywords": ["Dra Lilian Quintanilha", "Dentista", "clínica odontológica", "tratamento dentário", "saúde bucal", "odontologia"] }
+{ "id": 214, "name": "Barman Up - Open Bar", "category": "🍹 Bar", "link": "https://share.google/7GCT58vw7cTag2Vkj", "keywords": ["Barman Up - Open Bar", "Bar", "open bar", "bartender", "eventos", "drinks", "bar para festas"] },
+
+{ "id": 215, "name": "J&J Produtos de Limpeza", "category": "🧼 Fornecedor de produtos de limpeza", "link": "https://share.google/2402yxA0l2Wh4awKN", "keywords": ["J&J Produtos de Limpeza", "Fornecedor de produtos de limpeza", "produtos de limpeza", "distribuidora de limpeza", "higiene", "produtos para casa"] },
+
+{ "id": 216, "name": "Serralheria do Paulista", "category": "🪓 Serralheria", "link": "https://share.google/3rT7BbjBH7Ear2O4E", "keywords": ["Serralheria do Paulista", "Serralheria", "portões", "grades", "estrutura metálica", "serralheiro"] },
+
+{ "id": 217, "name": "Estúdio Andreza Ramos Fotografia", "category": "📸 Estúdio de fotografia", "link": "https://share.google/Av0s7ZQj3k9yPQy0J", "keywords": ["Estúdio Andreza Ramos Fotografia", "Estúdio de fotografia", "fotografia profissional", "ensaio fotográfico", "eventos", "fotógrafo"] },
+
+{ "id": 218, "name": "2 Reis Odonto", "category": "🦷 Clínica odontológica", "link": "https://share.google/eil46Pw5IE2cjojrt", "keywords": ["2 Reis Odonto", "Clínica odontológica", "Dentistas", "tratamento dentário", "saúde bucal", "dentista"] },
+
+{ "id": 219, "name": "Cafeteria Flor de Café", "category": "☕ Cafeteria", "link": "https://share.google/GWNAfKJW4TB3CkkYz", "keywords": ["Cafeteria Flor de Café", "Cafeteria", "café especial", "lanches", "doces", "café da tarde"] },
+
+{ "id": 220, "name": "Russo Radiadores", "category": "🚗 Oficina Mecânica", "link": "https://share.google/sZusCa8AhFGQ1l3V1", "keywords": ["Russo Radiadores", "Oficina Mecânica", "radiadores", "arrefecimento", "manutenção automotiva", "mecânico"] },
+
+{ "id": 221, "name": "Açaí Campo Grande", "category": "🍧 Loja de açaí", "link": "https://share.google/HHkuKpz0XfBglsOu0", "keywords": ["Açaí Campo Grande", "Loja de açaí", "açaí na tigela", "sobremesa", "lanches", "açaí delivery"] },
+
+{ "id": 222, "name": "Moto Master | Motos Elétricas Bicicletas Elétricas | Campo Grande", "category": "🛵 Concessionária de ciclomotores", "link": "https://share.google/9hC2ED1DVd2x69HEQ", "keywords": ["Moto Master", "Concessionária de ciclomotores", "motos elétricas", "bicicletas elétricas", "mobilidade elétrica", "loja de motos"] },
+
+{ "id": 223, "name": "Pizzaria Ideal.com", "category": "🍕 Pizzaria", "link": "https://share.google/29zASnjGxsqrt3Gmk", "keywords": ["Pizzaria Ideal.com", "Pizzaria", "pizza delivery", "massa artesanal", "restaurante", "pizza perto de mim"] },
+
+{ "id": 224, "name": "CIMC IMOBILIÁRIA", "category": "🏠 Imobiliária", "link": "https://share.google/9MVCsRUcRdNApEJb4", "keywords": ["CIMC IMOBILIÁRIA", "Imobiliária", "compra e venda de imóveis", "aluguel", "corretagem", "imóveis"] },
+
+{ "id": 225, "name": "YOGA DOG'X", "category": "🐶 Loja de ração", "link": "https://share.google/y1Hix6Djy9FSufmvj", "keywords": ["YOGA DOG'X", "Loja de ração", "ração para cães", "alimentos pet", "pet shop", "ração"] },
+
+{ "id": 226, "name": "Paulinho da Ração", "category": "🐶 Pet Shop", "link": "https://share.google/MjN2s5c06qoLqXthn", "keywords": ["Paulinho da Ração", "Pet Shop", "ração animal", "acessórios pet", "banho e tosa", "loja pet"] },
+
+{ "id": 227, "name": "Rio Pragas", "category": "🦟 Dedetizadora", "link": "https://share.google/MudeqXN9pMQMQJ8Ez", "keywords": ["Rio Pragas", "Dedetizadora", "controle de pragas", "desinsetização", "descupinização", "dedetização"] },
+
+{ "id": 228, "name": "Corretor Imobiliário", "category": "🏠 Corretora", "link": "https://share.google/VPbkPSTOsyvK65lCR", "keywords": ["Corretor Imobiliário", "Corretora", "venda de imóveis", "consultoria imobiliária", "aluguel", "corretor de imóveis"] },
+
+{ "id": 229, "name": "Palácio dos Pets", "category": "🐶 Pet Shop", "link": "https://share.google/3DV5Td9jDIYC9gVjH", "keywords": ["Palácio dos Pets", "Pet Shop", "ração animal", "acessórios pet", "banho e tosa", "loja pet"] },
+
+{ "id": 230, "name": "Spa Body Massage", "category": "💇‍♀️ Salão de beleza", "link": "https://share.google/ayCZHx6FDkIblm5Fn", "keywords": ["Spa Body Massage", "Salão de beleza", "massagem", "estética corporal", "bem-estar", "clínica de estética"] },
+
+{ "id": 231, "name": "Instituo Vitallis", "category": "💇‍♀️ Salão de beleza", "link": "https://share.google/9igCZdDwRGpfEuBkP", "keywords": ["Instituo Vitallis", "Salão de beleza", "estética avançada", "tratamentos corporais", "bem-estar", "clínica de estética"] },
+
+{ "id": 232, "name": "Dino Piscinas Sepetiba", "category": "🏊 Loja de produtos para piscinas", "link": "https://share.google/vnR92JA8XzxWvHX6n", "keywords": ["Dino Piscinas Sepetiba", "Loja de produtos para piscinas", "manutenção de piscina", "acessórios para piscina", "limpeza de piscina", "produtos para piscina"] },
+
+{ "id": 233, "name": "Gil Pneus", "category": "🚗 Oficina Mecânica", "link": "https://maps.app.goo.gl/5jmQ15s4mPwXGNsbA", "keywords": ["Gil Pneus", "Oficina Mecânica", "troca de pneus", "alinhamento", "balanceamento", "mecânico"] },
+
+{ "id": 234, "name": "Dra Bruna Ottan", "category": "🦷 Clínica odontológica", "link": "https://share.google/u9hZxVN8c3CLNB6XY", "keywords": ["Dra Bruna Ottan", "Clínica odontológica", "Dentistas", "tratamento dentário", "saúde bucal", "dentista"] },
+
+{ "id": 235, "name": "Odonto Campos (Nova Sepetiba)", "category": "🦷 Clínica odontológica", "link": "https://share.google/DrjkrHGqtyb9Ey9ow", "keywords": ["Odonto Campos", "Clínica odontológica", "Dentistas", "tratamento dentário", "saúde bucal", "dentista"] },
+
+{ "id": 236, "name": "Eu Rio Odonto", "category": "🦷 Clínica odontológica", "link": "https://share.google/rCkZNwu7bUpi3g0Ur", "keywords": ["Eu Rio Odonto", "Clínica odontológica", "Dentistas", "tratamento dentário", "saúde bucal", "dentista"] },
+
+{ "id": 237, "name": "Franquia Moto-Peças/RR Moto-Peças", "category": "🛵 Loja de peças para motocicletas", "link": "https://share.google/6e8xIdiemTcbzcdia", "keywords": ["RR Moto-Peças", "Loja de peças para motocicletas", "peças de moto", "acessórios para moto", "oficina de moto", "moto peças"] },
+
+{ "id": 238, "name": "ANTARES MOTO PEÇAS", "category": "🛵 Loja de peças para motocicletas", "link": "https://share.google/qOEHkGjFwcnOZtlnM", "keywords": ["ANTARES MOTO PEÇAS", "Loja de peças para motocicletas", "peças de moto", "acessórios para moto", "oficina de moto", "moto peças"] },
+
+{ "id": 239, "name": "TMJ Group", "category": "🏢 Serviço B2B", "link": "https://share.google/vhngvIHjFDNEHOBW2", "keywords": ["TMJ Group", "Serviço B2B", "consultoria empresarial", "prestação de serviços", "gestão empresarial", "empresa para empresa"] },
+
+{ "id": 240, "name": "Elisangela Silva Estética Avançada", "category": "💇‍♀️ Salão de beleza", "link": "https://share.google/YiRkL0yfK1WXnYgEa", "keywords": ["Elisangela Silva Estética Avançada", "Salão de beleza", "estética avançada", "tratamentos faciais", "beleza", "clínica de estética"] },
+
+{ "id": 241, "name": "Borboleta Chic", "category": "💇‍♀️ Salão de beleza", "link": "https://share.google/YoTdZt5r5MWfC39a7", "keywords": ["Borboleta Chic", "Salão de beleza", "corte de cabelo", "escova", "colorimetria", "cabeleireiro"] },
+
+{ "id": 242, "name": "Carlos Chaveiro", "category": "🔑 Chaveiro", "link": "https://share.google/8dtkZekuGb6jhFn5A", "keywords": ["Carlos Chaveiro", "Chaveiro", "cópia de chave", "abertura de portas", "chave automotiva", "chaveiro 24h"] },
+
+{ "id": 243, "name": "RF Decor", "category": "🏠 Decorador de interiores", "link": "https://share.google/CuC1urR2Kv6lYCVwt", "keywords": ["RF Decor", "Decorador de interiores", "design de interiores", "projetos residenciais", "decoração", "decorador"] },
+
+{ "id": 244, "name": "Amendoeira Shopping", "category": "🧱 Material de Construção", "link": "https://share.google/0UELqyQLhNgne7mOw", "keywords": ["Amendoeira Shopping", "Material de Construção", "material de obra", "reforma", "construção", "loja de material"] },
+
+{ "id": 245, "name": "Manoela Gil Advocacia e Consultoria em Saúde", "category": "⚖️ Escritório de advocacia", "link": "https://share.google/6c1R1sR5ijn6DqcHu", "keywords": ["Manoela Gil Advocacia", "Escritório de advocacia", "direito à saúde", "consultoria jurídica", "advocacia especializada", "advogado"] },
+
+{ "id": 246, "name": "Cleide Bellas Studio Academy", "category": "💇‍♀️ Salão de beleza", "link": "https://share.google/W72cbil3QV0bCfaeX", "keywords": ["Cleide Bellas Studio Academy", "Salão de beleza", "cursos de beleza", "cabeleireiro", "estética", "salão"] },
+
+{ "id": 247, "name": "Escritório Oliveira & Rizzi Advogados Especializados", "category": "⚖️ Assistência jurídica", "link": "https://share.google/JDb9AWhQF0xWxD6do", "keywords": ["Oliveira & Rizzi Advogados", "Assistência jurídica", "consultoria jurídica", "direito civil", "advocacia", "advogado"] },
+
+{ "id": 248, "name": "2 Irmãos Moto Peças | Paciência", "category": "🏍️ Loja de motocicletas", "link": "https://share.google/JpEIQDNu9wpeNNmeY", "keywords": ["2 Irmãos Moto Peças", "Loja de motocicletas", "motos", "peças de moto", "acessórios", "moto peças"] },
+
+{ "id": 249, "name": "Nova Maps Material de Construção", "category": "⚡️ Loja de materiais elétricos", "link": "https://share.google/37dn0MMSfGkIkrRnh", "keywords": ["Nova Maps Material de Construção", "Loja de materiais elétricos", "material elétrico", "instalação elétrica", "iluminação", "loja elétrica"] },
+
+{ "id": 250, "name": "Ferreira Veículos", "category": "🚗 Concessionária", "link": "https://share.google/93Aay62pi3IyTbDYQ", "keywords": ["Ferreira Veículos", "Concessionária", "compra e venda de carros", "veículos seminovos", "automóveis", "loja de carros"] },
+
+{ "id": 251, "name": "Corcel Azul Centro Automotivo", "category": "🚗 Oficina Mecânica", "link": "https://share.google/07zbD9cYnyTeAtOPt", "keywords": ["Corcel Azul Centro Automotivo", "Oficina Mecânica", "manutenção automotiva", "revisão de carro", "mecânico", "mecânica"] },
+
+{ "id": 252, "name": "Nova Maps Materiais de Construção", "category": "⚡️ Loja de materiais elétricos", "link": "https://share.google/8ROoaVRMDqKMQ5xeV", "keywords": ["Nova Maps Materiais de Construção", "Loja de materiais elétricos", "material elétrico", "instalação elétrica", "iluminação", "loja elétrica"] },
+
+{ "id": 253, "name": "Foca no Bistrô", "category": "🍻 Bar", "link": "https://share.google/S0dZZAKvfSo9WfJF2", "keywords": ["Foca no Bistrô", "Bar", "bistrô", "chopp artesanal", "petiscos", "barzinho"] },
+
+{ "id": 254, "name": "Ótica Vila Nova", "category": "👓 Ótica", "link": "https://share.google/fxI2XBgfr51i5Qv9K", "keywords": ["Ótica Vila Nova", "Ótica", "óculos", "lentes", "exame de vista", "ótica"] },
+
+{ "id": 255, "name": "Auto Center do Gugu", "category": "🚗 Oficina Mecânica", "link": "https://share.google/jcSh5bkmrEFPoD9jo", "keywords": ["Auto Center do Gugu", "Oficina Mecânica", "manutenção automotiva", "revisão de carro", "mecânico", "mecânica"] }
+
+    ];
+
+    const motivationalQuotes = [
+        "Acredite em você mesmo e tudo será possível. ✨",
+        "O sucesso é a soma de pequenos esforços repetidos dia após dia. 🚀",
+        "Não espere por oportunidades extraordinárias. Agarre as comuns e torne-as grandes. 💪",
+        "Sua atitude, não sua aptidão, determinará sua altitude. 🌟",
+        "O único lugar onde o sucesso vem antes do trabalho é no dicionário. 💼",
+        "Vender é ajudar. Concentre-se em como seu produto/serviço pode realmente ajudar seus clientes. 🤝",
+        "A persistência realiza o impossível. Não desista! 🔥"
+    ];
+
+    const Modal = ({ isOpen, onClose, title, children }) => {
+        if (!isOpen) return null;
+        return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4" },
+            React.createElement("div", { className: "bg-[#2c2c2c] p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-md border border-gray-700" },
+                React.createElement("div", { className: "flex justify-between items-center mb-4" },
+                    React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, title || "Aviso"),
+                    React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
+                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                        )
+                    )
+                ),
+                React.createElement("div", { className: "text-gray-300 mb-5 md:mb-6 text-sm md:text-base" }, children),
+                React.createElement("div", { className: "flex justify-end" },
+                    React.createElement(DarkButton, { onClick: onClose, buttonColor: "bg-green-700 hover:bg-green-800", className: "py-2 px-4 md:py-2.5 md:px-5 text-sm md:text-base" }, "OK")
+                )
+            )
+        );
+    };
+
+    const DarkButton = ({ children, onClick, className = '', buttonColor = 'bg-gray-800', icon = null, style = {} }) => {
+        return React.createElement("button", {
+            onClick: onClick,
+            style: style,
+            className: `
+                relative
+                ${buttonColor}
+                text-white
+                font-semibold
+                py-3 px-5 md:py-4 md:px-6
+                rounded-xl
+                shadow-lg
+                transition-all
+                duration-300
+                ease-in-out
+                overflow-hidden
+                hover:opacity-90
+                focus:outline-none
+                focus:ring-2
+                focus:ring-offset-2
+                focus:ring-offset-[#1a1a1a]
+                focus:ring-green-600
+                group
+                flex items-center justify-center space-x-2
+                ${className}
+            `
+        },
+        icon && React.createElement("span", { className: "mr-1 md:mr-2" }, icon),
+        React.createElement("span", { className: "relative z-10 text-sm md:text-base" }, children),
+        React.createElement("span", {
+            className: `
+                absolute
+                bottom-0 left-0 right-0
+                h-1
+                bg-gradient-to-r from-transparent via-green-700 to-transparent
+                opacity-0
+                group-hover:opacity-100
+                group-focus:opacity-100
+                transition-opacity
+                duration-300
+                ease-in-out
+            `
+        })
+      );
+    };
+
+    const HomePage = ({
+        appBgColor,
+        motivationalMessage,
+        searchTerm,
+        handleSearch,
+        showCompanyDetails,
+        searchResults,
+        setShowCompanyDetails,
+        setCurrentPage,
+        isChatOpen,
+        setIsChatOpen,
+        chatMessages,
+        chatInput,
+        handleAIMessage,
+        setChatInput,
+        showAlertModal
+    }) => {
+
+        const handleCompanyClick = (company) => {
+            const cleanCategory = company.category.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+            const searchQuery = `${company.name} ${cleanCategory}`;
+            const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+            window.open(googleSearchUrl, '_blank');
+            setShowCompanyDetails(false);
+        };
+
+        return React.createElement("div", { className: "flex flex-col items-center min-h-screen p-4 md:p-6", style: { backgroundColor: appBgColor } },
+            React.createElement("div", { className: "mb-6 mt-6" },
+                React.createElement("div", { className: "w-28 h-28 md:w-32 md:h-32 bg-black rounded-full flex items-center justify-center shadow-2xl" },
+                    React.createElement("span", { className: "text-white text-4xl md:text-5xl font-bold" }, "AG5")
+                )
+            ),
+            React.createElement("h1", { className: "text-3xl md:text-4xl font-bold mb-3 text-center text-white" }, "Bem-Vindo!"),
+            React.createElement("p", { className: "text-lg md:text-xl text-gray-400 mb-8 text-center max-w-md" }, "Guia Comercial AG5"),
+            React.createElement("div", { className: "w-full max-w-2xl mb-6 p-4 bg-[#2c2c2c] rounded-xl shadow-lg text-center" },
+                React.createElement("p", { className: "text-green-500 text-sm md:text-base italic" }, `"${motivationalMessage}"`)
+            ),
+            React.createElement("div", { className: "w-full max-w-2xl mb-4 relative" },
+                React.createElement("input", {
+                    type: "text",
+                    className: "w-full p-4 rounded-xl bg-[#2c2c2c] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-600 shadow-inner text-base md:text-lg",
+                    placeholder: "🔍 Pesquisar Empresas, Categorias, Produtos...",
+                    value: searchTerm,
+                    onChange: handleSearch
+                }),
+                showCompanyDetails && searchResults.length > 0 && (
+                    React.createElement("div", { className: "absolute top-full mt-2 left-0 right-0 bg-[#2c2c2c] rounded-lg shadow-xl border border-green-700 z-30 max-h-80 overflow-y-auto custom-scrollbar" },
+                        React.createElement("div", { className: "p-4" },
+                            React.createElement("div", { className: "flex justify-between items-center mb-3" },
+                                React.createElement("h3", { className: "text-lg font-semibold text-white" }, `Resultados da Pesquisa (${searchResults.length})`),
+                                React.createElement("button", { onClick: () => setShowCompanyDetails(false), className: "text-gray-400 hover:text-white" },
+                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "2" },
+                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" })
+                                    )
+                                )
+                            ),
+                            searchResults.map((company) => (
+                                React.createElement("div", {
+                                    key: company.id,
+                                    className: "bg-gray-700 hover:bg-gray-600 p-3 rounded-md mb-2 cursor-pointer transition-colors",
+                                    onClick: () => handleCompanyClick(company)
+                                },
+                                React.createElement("p", { className: "font-semibold text-base text-white" }, company.name),
+                                React.createElement("p", { className: "text-gray-300 text-xs" }, company.category)
+                                )
+                            ))
+                        )
+                    )
+                ),
+                showCompanyDetails && searchResults.length === 0 && searchTerm.length > 0 && (
+                    React.createElement("div", { className: "absolute top-full mt-2 left-0 right-0 bg-[#2c2c2c] rounded-lg shadow-xl border border-gray-700 z-30 p-4" },
+                        React.createElement("p", { className: "text-white text-center" }, `Nenhum resultado encontrado para "${searchTerm}".`)
+                    )
+                )
+            ),
+            React.createElement("div", { className: "grid grid-cols-2 gap-4 w-full max-w-2xl mb-8" },
+                React.createElement(DarkButton, { onClick: () => showAlertModal('Em Breve!', 'A funcionalidade de Vídeos Tutoriais será disponibilizada em breve.'), buttonColor: "bg-gray-700 hover:bg-gray-600" }, "🎬 Vídeos Tutoriais"),
+                React.createElement(DarkButton, { onClick: () => window.open('https://chat.whatsapp.com/JTkxYgXJ86L55g1kKjKMfK', '_blank'), buttonColor: "bg-green-800 hover:bg-green-700", icon: React.createElement(WhatsAppIcon, null) }, "Ir para Grupo")
+            ),
+            React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl" },
+                React.createElement(DarkButton, { onClick: () => setCurrentPage('client-results'), buttonColor: "bg-teal-700 hover:bg-teal-600" }, "📊 Resultados Clientes"),
+                React.createElement(DarkButton, { onClick: () => showAlertModal('Em Construção', 'A página de Notas e Metas está em desenvolvimento e será disponibilizada em breve!'), buttonColor: "bg-yellow-700 hover:bg-yellow-800" }, "📝 Notas e Metas"),
+                React.createElement(DarkButton, { onClick: () => setCurrentPage('sales-insights'), buttonColor: "bg-gray-800 hover:bg-gray-700", className: "col-span-1 md:col-span-2" }, "💡 Dicas e Insights"),
+                React.createElement(DarkButton, { onClick: () => showAlertModal('Redirecionamento', 'Redirecionando para o CRM externo...'), className: "col-span-1 md:col-span-2", buttonColor: "", style: { backgroundColor: '#a24689' } }, "🔗 CRM e Cadastros")
+            ),
+            React.createElement("button", {
+                onClick: () => setIsChatOpen(!isChatOpen),
+                className: "fixed bottom-6 right-6 bg-green-700 text-white p-4 rounded-full shadow-2xl hover:bg-green-800 transition-colors duration-300 z-50"
+            },
+                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-7 w-7", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "2" },
+                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-fivel-5 5v-5z" })
+                )
+            ),
+            isChatOpen && (
+                React.createElement("div", { className: "fixed bottom-24 right-6 w-80 md:w-96 h-[28rem] bg-[#2c2c2c] rounded-xl shadow-2xl flex flex-col z-[60] border border-gray-700" },
+                    React.createElement("div", { className: `p-3 bg-[#1a1a1a] rounded-t-xl flex justify-between items-center border-b border-gray-700` },
+                        React.createElement("h3", { className: "text-md font-semibold text-white" }, "Guia Comercial AG5 (IA)"),
+                        React.createElement("button", { onClick: () => setIsChatOpen(false), className: "text-gray-400 hover:text-white" },
+                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "2" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" })
+                            )
+                        )
+                    ),
+                    React.createElement("div", { className: "flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3" },
+                        chatMessages.map((msg, index) => (
+                            React.createElement("div", { key: index, className: `flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}` },
+                                React.createElement("span", { className: `max-w-[80%] inline-block p-2 px-3 rounded-xl text-sm ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-gray-600 text-white rounded-bl-none'}` }, msg.text)
+                            )
+                        )),
+                        chatMessages.length === 0 && (
+                            React.createElement("div", { className: "text-center text-gray-400 text-sm p-4" }, "Olá! Pergunte-me sobre os serviços da AG5, como usar o app, ou peça dicas de vendas.")
+                        )
+                    ),
+                    React.createElement("div", { className: "p-3 border-t border-gray-700 flex" },
+                        React.createElement("input", {
+                            type: "text",
+                            className: "flex-1 p-2 rounded-l-lg bg-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-600 text-sm",
+                            placeholder: "Sua mensagem...",
+                            value: chatInput,
+                            onChange: (e) => setChatInput(e.target.value),
+                            onKeyPress: (e) => {
+                                if (e.key === 'Enter' && chatInput.trim()) {
+                                    handleAIMessage(chatInput);
+                                }
+                            }
+                        }),
+                        React.createElement("button", {
+                            onClick: () => chatInput.trim() && handleAIMessage(chatInput),
+                            className: "bg-yellow-700 text-white px-4 py-2 rounded-r-lg hover:bg-yellow-800 transition-colors duration-300 text-sm"
+                        }, "Enviar")
+                    )
+                )
+            ),
+            React.createElement("footer", { className: "w-full max-w-2xl mt-10 pt-6 border-t border-gray-700 flex flex-col sm:flex-row justify-center items-center gap-4" },
+                React.createElement(DarkButton, { onClick: () => window.open('https://www.ag5agencia.com.br', '_self'), buttonColor: "bg-gray-700 hover:bg-gray-600", className: "py-2 px-4 text-xs" }, "🌐 AG5 Site Oficial"),
+                React.createElement(DarkButton, { onClick: () => window.open('https://g.co/kgs/QoXq7fK', '_blank'), buttonColor: "bg-red-700 hover:bg-red-600", className: "py-2 px-4 text-xs" }, "⭐ Perfil Google AG5")
+            )
+        );
+    };
+
+    const ClientResultsPage = ({ setCurrentPage, appBgColor, showAlertModal }) => {
+        return React.createElement("div", { className: "min-h-screen p-4 md:p-6 text-white flex flex-col items-center", style: { backgroundColor: appBgColor } },
+            React.createElement("h2", { className: "text-2xl md:text-3xl font-bold mb-6 text-center" }, "Resultados dos Clientes"),
+            React.createElement("div", { className: `w-full max-w-2xl bg-[#2c2c2c] rounded-xl p-6 shadow-xl border border-gray-700` },
+                React.createElement("p", { className: "text-gray-300 text-center mb-4 text-sm md:text-base" }, "Aqui você encontrará os PDFs com os resultados e relatórios de desempenho dos nossos clientes. (Funcionalidade em desenvolvimento)"),
+                React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+                    ['Cliente A', 'Cliente B', 'Cliente C'].map(client => (
+                        React.createElement("div", { key: client, className: "bg-gray-700 p-4 rounded-lg flex items-center justify-between shadow-md" },
+                            React.createElement("span", { className: "font-semibold text-white text-sm" }, `Relatório - ${client}.pdf`),
+                            React.createElement("button", {
+                                onClick: () => showAlertModal('Simulação', `Simulando visualização do PDF para ${client}...`),
+                                className: "text-green-500 hover:text-green-400 text-sm"
+                            }, "Visualizar")
+                        )
+                    ))
+                )
+            ),
+            React.createElement(DarkButton, { onClick: () => setCurrentPage('home'), className: "mt-8", buttonColor: "bg-gray-700 hover:bg-gray-600" }, "🏠 Voltar para o Início")
+        );
+    };
+
+    const SalesInsightsPage = ({ setCurrentPage, appBgColor }) => {
+        const SectionTitle = ({ children }) => React.createElement("h3", { className: "text-xl md:text-2xl font-semibold text-green-500 mt-6 mb-3" }, children);
+        const SubSectionTitle = ({ children }) => React.createElement("h4", { className: "text-lg md:text-xl font-semibold text-yellow-500 mt-4 mb-2" }, children);
+        const Paragraph = ({ children, className = "" }) => React.createElement("p", { className: `text-gray-300 mb-3 leading-relaxed text-sm md:text-base ${className}` }, children);
+        const ListItem = ({ children, className = "" }) => React.createElement("li", { className: `text-gray-300 mb-2 ml-4 list-disc ${className}` }, children);
+        const Quote = ({ children }) => React.createElement("blockquote", { className: "border-l-4 border-green-600 pl-4 italic text-gray-400 my-4 text-sm md:text-base" }, children);
+
+        return React.createElement("div", { className: "min-h-screen p-4 md:p-6 text-white flex flex-col items-center", style: { backgroundColor: appBgColor } },
+            React.createElement("h2", { className: "text-2xl md:text-3xl font-bold mb-6 text-center" }, "💡 Plano de Vendas e Treinamento para Vendedores"),
+            React.createElement("div", { className: `w-full max-w-3xl bg-[#2c2c2c] rounded-xl p-6 md:p-8 shadow-xl border border-gray-700 overflow-y-auto custom-scrollbar`, style: { maxHeight: 'calc(100vh - 150px)' } },
+                React.createElement(SectionTitle, null, "Atualização do Google Meu Negócio (AG5)"),
+                React.createElement(SubSectionTitle, null, "🎯 Objetivo"),
+                React.createElement(Paragraph, null, "Oferecer o serviço de atualização e otimização do perfil das empresas locais no Google Meu Negócio, demonstrando o valor agregado e convertendo visitas em vendas."),
+                React.createElement(Paragraph, { className: "text-yellow-400" }, "⚠️ Atualmente, o Google é a principal plataforma de busca e aquisição. Quando um cliente pesquisa e encontra um perfil incompleto ou desatualizado, ele passa para o próximo. Nosso serviço visa tornar a empresa mais atraente, destacada na primeira página do Google e pronta para converter visitas em negócios."),
+                React.createElement(SectionTitle, null, "📌 Etapas do Plano de Vendas"),
+                React.createElement(SubSectionTitle, null, "1️⃣ Preparação (Antes da Visita)"),
+                React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "🔎 Análise do Perfil do Cliente no Google Meu Negócio")),
+                React.createElement(Paragraph, null, "✅ Verificar se os links estão corretos e completos:"),
+                React.createElement("ul", { className: "space-y-2 mb-3" },
+                    React.createElement(ListItem, null, React.createElement("strong", { className: "text-gray-100" }, "Serviços:"), " Devem ter palavras-chave e descrições em cada categoria."),
+                    React.createElement(ListItem, null, React.createElement("strong", { className: "text-gray-100" }, "Produtos/Menu:"), " Devem conter descrições e palavras-chave relevantes, além de links diretos para WhatsApp ou telefone."),
+                    React.createElement(ListItem, null, React.createElement("strong", { className: "text-gray-100" }, "Do Proprietário:"), " Conferir a última postagem; usar conteúdos interativos como vídeos, fotos, promoções e eventos para gerar engajamento e ajudar no ranqueamento."),
+                    React.createElement(ListItem, null, React.createElement("strong", { className: "text-gray-100" }, "Avaliações:"), " Responder todas as avaliações para fidelizar clientes e impulsionar a reputação.", React.createElement("br", null), React.createElement("em", { className: "text-sm text-gray-400" }, "*Obs:* Avaliações com palavras-chave ajudam no ranqueamento e podem fazer o perfil aparecer apenas pela avaliação."))
+                ),
+                React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "📊 Informações Básicas:")),
+                React.createElement("ul", { className: "space-y-1 mb-3" },
+                    React.createElement(ListItem, null, "Endereço"),
+                    React.createElement(ListItem, null, "Horário de funcionamento"),
+                    React.createElement(ListItem, null, "Telefone"),
+                    React.createElement(ListItem, null, "WhatsApp")
+                ),
+                React.createElement(Paragraph, { className: "text-yellow-400 font-semibold" }, "💡 Importante: Cerca de 70% dos consumidores pesquisam no Google antes de comprar ou visitar uma empresa."),
+                React.createElement(SubSectionTitle, null, "2️⃣ Abordagem Inicial (No Local)"),
+                React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "🗣️ Fale com o responsável:")),
+                React.createElement(Paragraph, null, "Caso perguntem o motivo da visita:", React.createElement(Quote, null, "“É sobre a atualização do perfil da empresa no Google Meu Negócio.”")),
+                React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "👋 *Se encontrar o dono:*")),
+                React.createElement(Paragraph, null, "Apresente-se:", React.createElement(Quote, null, "“Sou Fagner Galvão, especialista em Google Meu Negócio.”")),
+                React.createElement(Paragraph, null, "*Crie empatia e quebre o gelo:*", React.createElement(Quote, null, "“Estou aqui pra trazer mais clientes ou pacientes pra sua empresa – olha que proposta boa!”")),
+                React.createElement(Paragraph, null, "Mostre autoridade:", React.createElement(Quote, null, "“Percebi que o perfil da sua empresa está desatualizado na maior plataforma de busca do mundo: o Google. Isso pode estar impedindo novos clientes de te encontrarem.”")),
+                React.createElement(SubSectionTitle, null, "3️⃣ Solicitação de Tempo e Demonstração"),
+                React.createElement(Paragraph, null, "🕒 ", React.createElement(Quote, null, "“Será rapidinho! Posso te mostrar em 5 minutos (Sabendo que pode levar de 30min a 1h) como sua empresa pode se apresentar de forma mais profissional no Google.”")),
+                React.createElement(Paragraph, null, "*Mostre o perfil desatualizado do cliente e um modelo atualizado pela AG5 com:*"),
+                React.createElement("ul", { className: "space-y-1 mb-3" },
+                    React.createElement(ListItem, null, "Serviços e produtos otimizados"),
+                    React.createElement(ListItem, null, "Links diretos para WhatsApp"),
+                    React.createElement(ListItem, null, "Fotos, vídeos e postagens recentes"),
+                    React.createElement(ListItem, null, "Interação e atualizações constantes")
+                ),
+                React.createElement(SubSectionTitle, null, "4️⃣ Apresentação do Serviço"),
+                React.createElement(Paragraph, null, "📝 Explique de forma clara e objetiva:", React.createElement(Quote, null, "“Não vendemos posições no Google. Trabalhamos com um posicionamento correto e estratégico para atrair clientes qualificados, que chegam com intenção real de compra. Todos os acessos são direcionados diretamente para o WhatsApp ou telefone.”")),
+                React.createElement(SubSectionTitle, null, "5️⃣ Mostre os Benefícios"),
+                React.createElement(Paragraph, null, "Explique os 6 Pilares da Presença Digital no Google:"),
+                React.createElement("ol", { className: "list-decimal list-inside space-y-1 mb-3 text-gray-300" },
+                    React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Segurança:"), " Perfil sempre atualizado."),
+                    React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Confiança:"), " Informações claras e oficiais."),
+                    React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Credibilidade:"), " Avaliações reais de clientes."),
+                    React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Praticidade:"), " Contatos diretos de atendimento."),
+                    React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Facilidade:"), " Tudo em um só lugar."),
+                    React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Comparação assertiva:"), " Destaque em relação à concorrência.")
+                ),
+                React.createElement(SubSectionTitle, null, "6️⃣ Detalhamento dos Serviços"),
+                React.createElement(Paragraph, null, "Mostre o formulário de serviços disponíveis:"),
+                React.createElement("ul", { className: "space-y-1 mb-3" },
+                    React.createElement(ListItem, null, "Atualização de fotos, produtos e serviços"),
+                    React.createElement(ListItem, null, "Criação de postagens e conteúdos"),
+                    React.createElement(ListItem, null, "Integração com WhatsApp"),
+                    React.createElement(ListItem, null, "Otimização de palavras-chave"),
+                    React.createElement(ListItem, null, "Gerenciamento e atualização constante")
+                ),
+                React.createElement(Paragraph, null, "*Sempre pergunte:*", React.createElement(Quote, null, "“Faz sentido pra você ter a sua empresa atualizada e profissional dentro do Google?”")),
+                React.createElement(SubSectionTitle, null, "7️⃣ Tire Dúvidas"),
+                React.createElement(Paragraph, null, "*Pergunte diretamente:*", React.createElement(Quote, null, "“Ficou com alguma dúvida?”"), " Esteja preparado para responder com confiança e técnica."),
+                React.createElement(SubSectionTitle, null, "8️⃣ Fechamento com Ancoragem de Preço"),
+                React.createElement(Paragraph, null, "Use a técnica de ancoragem para mostrar o valor real:", React.createElement(Quote, null, "“Esse tipo de serviço em agências grandes pode custar até R$15 mil. Mas relaxa! Você não vai pagar nem R$10 mil, 8 mil, 5 mil, nem 3 mil!”")),
+                React.createElement(Paragraph, null, "Oferta real:", React.createElement(Quote, null, "“Nossos pacotes vão de R$700 a R$2.000, dependendo da necessidade da sua empresa.”")),
+                React.createElement(SubSectionTitle, null, "9️⃣ Objeções sobre o Valor"),
+                React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "💰 Se o cliente achar caro:")),
+                React.createElement(Paragraph, null, "Pergunte: ", React.createElement(Quote, null, "“Caro em comparação com o quê?”")),
+                React.createElement(Paragraph, null, "Desafie: ", React.createElement(Quote, null, "“Se encontrar um perfil atualizado igual ao nosso, fazemos o seu de graça.”")),
+                React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "💳 Se não tiver dinheiro na hora:")),
+                React.createElement(Paragraph, null, React.createElement(Quote, null, "“Sem problema! Você pode pagar no cartão em até 12x com juros do próprio cartão.”")),
+                React.createElement(Paragraph, null, React.createElement(Quote, null, "“Ou podemos dividir em até 2x sem juros no cartão.”")),
+                React.createElement(SubSectionTitle, null, "🔟 Apresente o Gerenciamento Contínuo"),
+                React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "📆 Pacote de gerenciamento mensal (R$150 a R$1.000)"), React.createElement("br", null), "Inclui:"),
+                React.createElement("ul", { className: "space-y-1 mb-3" },
+                    React.createElement(ListItem, null, "✅ Resposta de todas as avaliações para fidelização."),
+                    React.createElement(ListItem, null, "✅ Atualização dos horários em feriados (Natal, Ano Novo, Carnaval, etc.)."),
+                    React.createElement(ListItem, null, "✅ Inclusão semanal de fotos e vídeos fornecidos pelo cliente."),
+                    React.createElement(ListItem, null, "✅ Atualização de produtos e serviços."),
+                    React.createElement(ListItem, null, "✅ Postagens semanais para gerar interação e rankeamento."),
+                    React.createElement(ListItem, null, "✅ Equipe dedicada para monitoramento e desempenho do perfil."),
+                    React.createElement(ListItem, null, "✅ Toda e qualquer atualização do Google será aplicada automaticamente ao perfil.")
+                ),
+                React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "🎁 Bônus:")),
+                React.createElement(Paragraph, null, "Placa de avaliação (valor R$67) para incentivar avaliações e melhorar o ranqueamento."),
+                React.createElement(SectionTitle, null, "🚫 O que não devemos falar:"),
+                React.createElement("ul", { className: "space-y-1 mb-3 text-red-400" },
+                    React.createElement(ListItem, null, "❌ “Vamos colocar sua empresa na primeira posição do Google.”"),
+                    React.createElement(ListItem, null, "❌ “Vendemos a primeira posição do Google.”"),
+                    React.createElement(ListItem, null, "❌ “Você vai vender mais.” (Nosso foco: atualização e atração de clientes qualificados)"),
+                    React.createElement(ListItem, null, "❌ “Trabalhamos para ou no Google.”"),
+                    React.createElement(ListItem, null, "❌ “Finalizamos em menos de 20 dias.”"),
+                    React.createElement(ListItem, null, "❌ “Vou te dar um site de vendas.” (Vendemos apenas landing pages)"),
+                    React.createElement(ListItem, null, "❌ “Vou dar as fotos 360°.” (As fotos são vendidas separadamente, a partir de R$80 cada)")
+                )
+            ),
+            React.createElement(DarkButton, { onClick: () => setCurrentPage('home'), className: "mt-8", buttonColor: "bg-gray-700 hover:bg-gray-600" }, "🏠 Voltar para o Início")
+        );
+    };
+
+    function App() {
+        const [currentPage, setCurrentPage] = useState('home');
+        const [isChatOpen, setIsChatOpen] = useState(false);
+        const [chatMessages, setChatMessages] = useState([]);
+        const [chatInput, setChatInput] = useState('');
+        const [searchTerm, setSearchTerm] = useState('');
+        const [searchResults, setSearchResults] = useState([]);
+        const [showCompanyDetails, setShowCompanyDetails] = useState(false);
+        const [motivationalMessage, setMotivationalMessage] = useState(motivationalQuotes[0]);
+        const [modalInfo, setModalInfo] = useState({ isOpen: false, title: '', message: '' });
+
+        const showAlertModal = (title, message) => {
+            setModalInfo({ isOpen: true, title, message });
+        };
+        const closeModal = () => {
+            setModalInfo({ isOpen: false, title: '', message: '' });
+        };
+
+        const appBgColor = '#1a1a1a';
+
+        useEffect(() => {
+            const intervalId = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+                setMotivationalMessage(motivationalQuotes[randomIndex]);
+            }, 12 * 60 * 60 * 1000);
+
+            return () => clearInterval(intervalId);
+        }, []);
+
+        const handleAIMessage = async (message) => {
+            setChatMessages((prev) => [...prev, { sender: 'user', text: message }]);
+            setChatInput('');
+
+            let aiResponse = "Desculpe, não entendi sua pergunta. Posso ajudar com informações sobre os serviços da AG5, pesquisar empresas, ou sobre as funcionalidades do app.";
+
+            if (message.toLowerCase().includes('olá') || message.toLowerCase().includes('oi')) {
+                aiResponse = "Olá! 👋 Como posso te ajudar hoje? Explore as funcionalidades do app ou me pergunte sobre os serviços da AG5.";
+            } else if (message.toLowerCase().includes('serviços')) {
+                aiResponse = "A AG5 oferece: Atualização e Gerenciamento de Perfis no Google Meu Negócio, Foto 360°, Tour Virtual, Gerenciamento de Instagram, Tráfego Pago, e produtos como Placa Acrílica de Avaliações e Sites. 🚀";
+            } else if (message.toLowerCase().includes('equipe')) {
+                aiResponse = "Nossa equipe inclui: Mauricio Areia (Diretor Operacional), Fagner Galvão (Diretor de Vendas), Demilson (Comercial), Helem Brito e Mylena Martins (Atualização de Perfil), Sara Areia (Gerenciamento de Perfil), Jullyane (Gerenciamento de Instagram), e parceiros para Criação de Site e Produtos. ✔️";
+            } else if (message.toLowerCase().includes('pesquisar empresa')) {
+                aiResponse = "Para pesquisar uma empresa, digite o nome, categoria, produto ou serviço na barra de pesquisa da tela inicial. Os resultados aparecerão abaixo. Ao clicar em um resultado, você será direcionado para uma pesquisa no Google sobre a empresa. 🔍";
+            } else if (message.toLowerCase().includes('contato') || message.toLowerCase().includes('whatsapp')) {
+                aiResponse = "Para falar diretamente com a equipe, use o botão 'Ir para Grupo' na tela inicial, ou acesse os links no rodapé da página. 📱";
+            } else if (message.toLowerCase().includes('notas e metas') || message.toLowerCase().includes('previsão') || message.toLowerCase().includes('comissão')) {
+                aiResponse = "A página de 'Notas e Metas' está atualmente em construção. Em breve teremos novidades sobre essa funcionalidade! 😉";
+            } else if (message.toLowerCase().includes('obrigado') || message.toLowerCase().includes('valeu')) {
+                aiResponse = "De nada! Estou aqui para ajudar. 😊";
+            }
+
+            setTimeout(() => {
+                setChatMessages((prev) => [...prev, { sender: 'ai', text: aiResponse }]);
+            }, 500);
+        };
+
+        const handleSearch = (e) => {
+            const term = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            setSearchTerm(e.target.value);
+            if (term.trim().length > 0) {
+                const filtered = companiesData.filter(company => {
+                    const companyNameNormalized = company.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const companyCategoryNormalized = company.category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+                    const companyKeywordsNormalized = company.keywords.map(kw => kw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+
+                    // Correção: Garante que a pesquisa seja mais específica para a categoria.
+                    // Se o termo de busca estiver nas palavras-chave, verifica se a categoria da empresa também
+                    // é relevante ou se o termo é um nome/categoria direta.
+                    return companyNameNormalized.includes(term) ||
+                           companyCategoryNormalized.includes(term) ||
+                           companyKeywordsNormalized.some(kw => kw.includes(term) || term.includes(kw));
+                });
+                setSearchResults(filtered);
+                setShowCompanyDetails(true);
+            } else {
+                setSearchResults([]);
+                setShowCompanyDetails(false);
+            }
+        };
+
+        const renderPage = () => {
+            const commonProps = { setCurrentPage, appBgColor, showAlertModal };
+            switch (currentPage) {
+                case 'home':
+                    return React.createElement(HomePage, {
+                        ...commonProps,
+                        motivationalMessage,
+                        searchTerm,
+                        handleSearch,
+                        showCompanyDetails,
+                        searchResults,
+                        setShowCompanyDetails,
+                        isChatOpen,
+                        setIsChatOpen,
+                        chatMessages,
+                        chatInput,
+                        handleAIMessage,
+                        setChatInput
+                    });
+                case 'client-results':
+                    return React.createElement(ClientResultsPage, commonProps);
+                case 'sales-insights':
+                    return React.createElement(SalesInsightsPage, commonProps);
+                default:
+                    return React.createElement(HomePage, {
+                        ...commonProps,
+                        motivationalMessage,
+                        searchTerm,
+                        handleSearch,
+                        showCompanyDetails,
+                        searchResults,
+                        setShowCompanyDetails,
+                        isChatOpen,
+                        setIsChatOpen,
+                        chatMessages,
+                        chatInput,
+                        handleAIMessage,
+                        setChatInput
+                    });
+            }
+        };
+
+        return (
+            React.createElement("div", { className: "font-sans antialiased" },
+                renderPage(),
+                React.createElement(Modal, { isOpen: modalInfo.isOpen, onClose: closeModal, title: modalInfo.title }, modalInfo.message)
+            )
+        );
+    }
+
+    ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    </script>
+</body>
+</html>

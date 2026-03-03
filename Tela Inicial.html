@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AG5 Gerenciador de Vendas</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent: #22c55e;
+            --accent-glow: rgba(34, 197, 94, 0.3);
+            --bg: #050505;
+            --surface: rgba(20, 20, 20, 0.6);
+            --border: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Efeito de Ruído Premium */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='n'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.65' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23n)'/%3e%3c/svg%3e");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 500;
+        }
+
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(34, 197, 94, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(20, 80, 40, 0.05) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .premium-border {
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .premium-border:hover {
+            border-color: rgba(34, 197, 94, 0.3);
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .text-mono {
+            font-family: monospace;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            opacity: 0.5;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+
+        input::placeholder {
+            color: #444;
+            font-weight: 300;
+        }
+
+        .btn-futuristic {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+        }
+
+        .btn-futuristic::after {
+            content: "";
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            transform: skewX(-20deg);
+            transition: 0.7s;
+            z-index: -1;
+        }
+
+        .btn-futuristic:hover::after {
+            left: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <!-- Base de dados de empresas (arquivo externo) -->
+    <script src="dados.js"></script>
+
+    <script>
+        const { useState, useEffect, useMemo } = React;
+
+        // Ícone do WhatsApp (SVG)
+        const WhatsAppIcon = () => (
+            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 24 24", fill: "currentColor" },
+                React.createElement("path", { d: "M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" })
+            )
+        );
+
+        const generateKeywords = (name, categoryDesc, common1, common2, popular1, popular2) => {
+            const stopWords = ['de', 'do', 'da', 'dos', 'das', 'e', 'a', 'o', 'em', 'para', 'com', 'loja', 'serviço', 'serviços', 'para', 'em'];
+            const cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s]/gi, '');
+            const cleanCategory = categoryDesc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\u{1F600}-\u{1F6FF}\u{1F300}-\u{1F5FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FAFF}\u{1F000}-\u{1F02F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+
+            const nameWords = cleanName.split(/\s+/).filter(Boolean);
+            const categoryWords = cleanCategory.split(/\s+/).filter(Boolean);
+
+            const specificKeywords = [common1, common2, popular1, popular2].filter(Boolean);
+
+            const allWords = [...new Set([...nameWords, ...categoryWords, ...specificKeywords])];
+            return allWords.filter(word => word.length > 2 && !stopWords.includes(word));
+        };
+
+        // companiesData agora é carregado via dados.js
+
+
+        const motivationalQuotes = [
+            "Acredite em você mesmo e tudo será possível. ✨",
+            "O sucesso é a soma de pequenos esforços repetidos dia após dia. 🚀",
+            "Não espere por oportunidades extraordinárias. Agarre as comuns e torne-as grandes. 💪",
+            "Sua atitude, não sua aptidão, determinará sua altitude. 🌟",
+            "O único lugar onde o sucesso vem antes do trabalho é no dicionário. 💼",
+            "Vender é ajudar. Concentre-se em como seu produto/serviço pode realmente ajudar seus clientes. 🤝",
+            "A persistência realiza o impossível. Não desista! 🔥"
+        ];
+
+        const Modal = ({ isOpen, onClose, title, children }) => {
+            if (!isOpen) return null;
+            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4" },
+                React.createElement("div", { className: "bg-[#2c2c2c] p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-md border border-gray-700" },
+                    React.createElement("div", { className: "flex justify-between items-center mb-4" },
+                        React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, title || "Aviso"),
+                        React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
+                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                            )
+                        )
+                    ),
+                    React.createElement("div", { className: "text-gray-300 mb-5 md:mb-6 text-sm md:text-base" }, children),
+                    React.createElement("div", { className: "flex justify-end" },
+                        React.createElement(DarkButton, { onClick: onClose, buttonColor: "bg-green-700 hover:bg-green-800", className: "py-2 px-4 md:py-2.5 md:px-5 text-sm md:text-base" }, "OK")
+                    )
+                )
+            );
+        };
+
+        const DarkButton = ({ children, onClick, className = '', buttonColor = 'bg-[#0a0a0a]', icon = null, style = {} }) => {
+            return React.createElement("button", {
+                onClick: onClick,
+                style: style,
+                className: `
+                    relative
+                    ${buttonColor}
+                    text-white
+                    py-4 px-6
+                    rounded-xl
+                    premium-border
+                    btn-futuristic
+                    transition-all
+                    duration-500
+                    hover:scale-[1.02]
+                    active:scale-95
+                    group
+                    flex items-center justify-center space-x-3
+                    overflow-hidden
+                    ${className}
+                `
+            },
+                React.createElement("div", { className: "absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" }),
+                icon && React.createElement("span", { className: "text-lg opacity-70 group-hover:opacity-100 transition-opacity" }, icon),
+                React.createElement("span", { className: "relative z-10 text-xs md:text-sm font-semibold tracking-widest uppercase" }, children)
+            );
+        };
+
+        const HomePage = ({
+            appBgColor,
+            motivationalMessage,
+            searchTerm,
+            handleSearch,
+            showCompanyDetails,
+            searchResults,
+            setShowCompanyDetails,
+            setCurrentPage,
+            isChatOpen,
+            setIsChatOpen,
+            chatMessages,
+            chatInput,
+            handleAIMessage,
+            setChatInput,
+            showAlertModal
+        }) => {
+
+            const handleCompanyClick = (company) => {
+                if (company.link && company.link !== "N/A") {
+                    window.open(company.link, '_blank');
+                } else {
+                    const cleanCategory = company.category.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+                    const searchQuery = `${company.name} ${cleanCategory}`;
+                    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+                    window.open(googleSearchUrl, '_blank');
+                }
+                setShowCompanyDetails(false);
+            };
+
+            return React.createElement("div", { className: "relative min-h-screen flex flex-col items-center justify-start p-6 md:p-16 overflow-hidden animate-fade-in" },
+                React.createElement("div", { className: "mesh-bg" }),
+
+                React.createElement("div", { className: "w-full max-w-6xl flex flex-col md:flex-row justify-between items-center mb-16 gap-8" },
+                    React.createElement("div", { className: "flex flex-col items-center md:items-start" },
+                        React.createElement("div", { className: "animate-float" },
+                            React.createElement("div", { className: "w-16 h-16 md:w-20 md:h-20 glass-panel rounded-2xl flex items-center justify-center border-white/10 mb-4 overflow-hidden p-2" },
+                                React.createElement("img", {
+                                    src: "Logo-%20AG5%20-%20Oficial%20(14).png",
+                                    className: "w-full h-full object-contain",
+                                    alt: "AG5 Logo"
+                                })
+                            )
+                        ),
+                        React.createElement("h1", { className: "text-4xl md:text-6xl font-bold tracking-tight text-white mb-2 uppercase" }, "Comercial"),
+                        React.createElement("div", { className: "text-mono text-green-500" }, "Agency Intelligence / v2.0")
+                    ),
+                    React.createElement("div", { className: "w-full max-w-md p-6 glass-panel rounded-2xl border-l-2 border-green-500/50" },
+                        React.createElement("div", { className: "text-mono mb-2" }, "Insights do Dia"),
+                        React.createElement("p", { className: "text-gray-400 text-sm italic font-light leading-relaxed" }, `“${motivationalMessage}”`)
+                    )
+                ),
+
+                React.createElement("div", { className: "w-full max-w-2xl mb-12 relative" },
+                    React.createElement("div", { className: "absolute -inset-1 bg-gradient-to-r from-green-500/10 to-transparent rounded-2xl blur opacity-20 transition duration-1000" }),
+                    React.createElement("div", { className: "relative" },
+                        React.createElement("input", {
+                            type: "text",
+                            className: "w-full pl-6 pr-12 py-6 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-700 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 transition-all text-lg backdrop-blur-xl",
+                            placeholder: "EXECUTAR BUSCA NO ECOSSISTEMA...",
+                            value: searchTerm,
+                            onChange: handleSearch
+                        }),
+                        React.createElement("div", { className: "absolute right-5 top-1/2 -translate-y-1/2 text-green-500/50 text-xs text-mono" }, "CTRL+K")
+                    ),
+
+                    showCompanyDetails && (
+                        React.createElement("div", { className: "absolute top-full mt-2 left-0 right-0 glass-panel rounded-xl shadow-2xl border border-white/10 z-[100] max-h-96 overflow-y-auto custom-scrollbar p-2" },
+                            searchResults.length > 0 ? (
+                                searchResults.map((company) => (
+                                    React.createElement("div", {
+                                        key: company.id,
+                                        onClick: () => handleCompanyClick(company),
+                                        className: "hover:bg-white/5 p-4 rounded-lg cursor-pointer transition-all flex justify-between items-center group"
+                                    },
+                                        React.createElement("div", null,
+                                            React.createElement("p", { className: "font-bold text-white group-hover:text-green-400 transition-colors uppercase tracking-tight" }, company.name),
+                                            React.createElement("p", { className: "text-mono mt-1" }, company.category)
+                                        ),
+                                        React.createElement("span", { className: "text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" }, "→")
+                                    )
+                                ))
+                            ) : searchTerm.length > 0 && (
+                                React.createElement("div", { className: "p-8 text-center text-mono" }, `NENHUM DADO ENCONTRADO PARA: ${searchTerm}`)
+                            )
+                        )
+                    )
+                ),
+
+                React.createElement("div", { className: "w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-4" },
+                    React.createElement("div", { className: "md:col-span-2 grid grid-cols-2 gap-4" },
+                        React.createElement(DarkButton, { onClick: () => showAlertModal('Em Breve', 'Módulo de treinamento em vídeo.'), className: "h-32" }, "🎬 Tutoriais"),
+                        React.createElement(DarkButton, { onClick: () => window.open('https://www.superchat.com/pt/tools/google-review-link-generator', '_blank'), className: "h-32" }, "⭐ Google Link"),
+                        React.createElement(DarkButton, { onClick: () => setCurrentPage('client-results'), className: "h-32" }, "📊 Resultados"),
+                        React.createElement(DarkButton, { onClick: () => window.open('https://drive.google.com/drive/folders/1Tq7zhcjDhXTxJ5q2T7vtJfyNqTF7W-7N', '_blank'), className: "h-32" }, "💬 Feedbacks")
+                    ),
+                    React.createElement("div", { className: "flex flex-col gap-4" },
+                        React.createElement(DarkButton, { onClick: () => setCurrentPage('sales-insights'), className: "flex-1" }, "💡 Insights"),
+                        React.createElement(DarkButton, { onClick: () => showAlertModal('Em Construção', 'Desenvolvimento acelerado.'), className: "flex-1" }, "📝 Metas"),
+                        React.createElement(DarkButton, {
+                            onClick: () => showAlertModal('Redirecionamento', 'Abrindo HUB de Vendas...'),
+                            buttonColor: "bg-green-600/10 hover:bg-green-600/20",
+                            className: "flex-1 border-green-500/30"
+                        }, "🔗 CRM ODOO")
+                    )
+                ),
+
+                React.createElement("footer", { className: "w-full max-w-4xl mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 opacity-40 hover:opacity-100 transition-opacity" },
+                    React.createElement("div", { className: "text-mono" }, "© 2024 AG5 Agency — Strategic Intelligence"),
+                    React.createElement("div", { className: "flex gap-8" },
+                        React.createElement("button", { onClick: () => window.open('https://www.ag5agencia.com.br', '_self'), className: "text-xs uppercase tracking-widest hover:text-green-500 transition-colors" }, "Site Oficial AG5"),
+                        React.createElement("button", { onClick: () => window.open('https://g.co/kgs/QoXq7fK', '_blank'), className: "text-xs uppercase tracking-widest hover:text-green-500 transition-colors" }, "Google AG5")
+                    )
+                )
+            );
+        };
+
+        const ClientResultsPage = ({ setCurrentPage, appBgColor, showAlertModal }) => {
+            return React.createElement("div", { className: "min-h-screen p-4 md:p-6 text-white flex flex-col items-center", style: { backgroundColor: appBgColor } },
+                React.createElement("h2", { className: "text-2xl md:text-3xl font-bold mb-6 text-center" }, "Resultados dos Clientes"),
+                React.createElement("div", { className: `w-full max-w-2xl bg-[#2c2c2c] rounded-xl p-6 shadow-xl border border-gray-700` },
+                    React.createElement("p", { className: "text-gray-300 text-center mb-4 text-sm md:text-base" }, "Aqui você encontrará os PDFs com os resultados e relatórios de desempenho dos nossos clientes. (Funcionalidade em desenvolvimento)"),
+                    React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+                        ['Cliente A', 'Cliente B', 'Cliente C'].map(client => (
+                            React.createElement("div", { key: client, className: "bg-gray-700 p-4 rounded-lg flex items-center justify-between shadow-md" },
+                                React.createElement("span", { className: "font-semibold text-white text-sm" }, `Relatório - ${client}.pdf`),
+                                React.createElement("button", {
+                                    onClick: () => showAlertModal('Simulação', `Simulando visualização do PDF para ${client}...`),
+                                    className: "text-green-500 hover:text-green-400 text-sm"
+                                }, "Visualizar")
+                            )
+                        ))
+                    )
+                ),
+                React.createElement(DarkButton, { onClick: () => setCurrentPage('home'), className: "mt-8", buttonColor: "bg-gray-700 hover:bg-gray-600" }, "🏠 Voltar para o Início")
+            );
+        };
+
+        const SalesInsightsPage = ({ setCurrentPage, appBgColor }) => {
+            const SectionTitle = ({ children }) => React.createElement("h3", { className: "text-xl md:text-2xl font-semibold text-green-500 mt-6 mb-3" }, children);
+            const SubSectionTitle = ({ children }) => React.createElement("h4", { className: "text-lg md:text-xl font-semibold text-yellow-500 mt-4 mb-2" }, children);
+            const Paragraph = ({ children, className = "" }) => React.createElement("p", { className: `text-gray-300 mb-3 leading-relaxed text-sm md:text-base ${className}` }, children);
+            const ListItem = ({ children, className = "" }) => React.createElement("li", { className: `text-gray-300 mb-2 ml-4 list-disc ${className}` }, children);
+            const Quote = ({ children }) => React.createElement("blockquote", { className: "border-l-4 border-green-600 pl-4 italic text-gray-400 my-4 text-sm md:text-base" }, children);
+
+            return React.createElement("div", { className: "min-h-screen p-4 md:p-6 text-white flex flex-col items-center", style: { backgroundColor: appBgColor } },
+                React.createElement("h2", { className: "text-2xl md:text-3xl font-bold mb-6 text-center" }, "💡 Plano de Vendas e Treinamento para Vendedores"),
+                React.createElement("div", { className: `w-full max-w-3xl bg-[#2c2c2c] rounded-xl p-6 md:p-8 shadow-xl border border-gray-700 overflow-y-auto custom-scrollbar`, style: { maxHeight: 'calc(100vh - 150px)' } },
+                    React.createElement(SectionTitle, null, "Atualização do Google Meu Negócio (AG5)"),
+                    React.createElement(SubSectionTitle, null, "🎯 Objetivo"),
+                    React.createElement(Paragraph, null, "Oferecer o serviço de atualização e otimização do perfil das empresas locais no Google Meu Negócio, demonstrando o valor agregado e convertendo visitas em vendas."),
+                    React.createElement(Paragraph, { className: "text-yellow-400" }, "⚠️ Atualmente, o Google é a principal plataforma de busca e aquisição. Quando um cliente pesquisa e encontra um perfil incompleto ou desatualizado, ele passa para o próximo. Nosso serviço visa tornar a empresa mais atraente, destacada na primeira página do Google e pronta para converter visitas em negócios."),
+                    React.createElement(SectionTitle, null, "📌 Etapas do Plano de Vendas"),
+                    React.createElement(SubSectionTitle, null, "1️⃣ Preparação (Antes da Visita)"),
+                    React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "🔎 Análise do Perfil do Cliente no Google Meu Negócio")),
+                    React.createElement(Paragraph, null, "✅ Verificar se os links estão corretos e completos:"),
+                    React.createElement("ul", { className: "space-y-2 mb-3" },
+                        React.createElement(ListItem, null, React.createElement("strong", { className: "text-gray-100" }, "Serviços:"), " Devem ter palavras-chave e descrições em cada categoria."),
+                        React.createElement(ListItem, null, React.createElement("strong", { className: "text-gray-100" }, "Produtos/Menu:"), " Devem conter descrições e palavras-chave relevantes, além de links diretos para WhatsApp ou telefone."),
+                        React.createElement(ListItem, null, React.createElement("strong", { className: "text-gray-100" }, "Do Proprietário:"), " Conferir a última postagem; usar conteúdos interativos como vídeos, fotos, promoções e eventos para gerar engajamento e ajudar no ranqueamento."),
+                        React.createElement(ListItem, null, React.createElement("strong", { className: "text-gray-100" }, "Avaliações:"), " Responder todas as avaliações para fidelizar clientes e impulsionar a reputação.", React.createElement("br", null), React.createElement("em", { className: "text-sm text-gray-400" }, "*Obs:* Avaliações com palavras-chave ajudam no ranqueamento e podem fazer o perfil aparecer apenas pela avaliação."))
+                    ),
+                    React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "📊 Informações Básicas:")),
+                    React.createElement("ul", { className: "space-y-1 mb-3" },
+                        React.createElement(ListItem, null, "Endereço"),
+                        React.createElement(ListItem, null, "Horário de funcionamento"),
+                        React.createElement(ListItem, null, "Telefone"),
+                        React.createElement(ListItem, null, "WhatsApp")
+                    ),
+                    React.createElement(Paragraph, { className: "text-yellow-400 font-semibold" }, "💡 Importante: Cerca de 70% dos consumidores pesquisam no Google antes de comprar ou visitar uma empresa."),
+                    React.createElement(SubSectionTitle, null, "2️⃣ Abordagem Inicial (No Local)"),
+                    React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "🗣️ Fale com o responsável:")),
+                    React.createElement(Paragraph, null, "Caso perguntem o motivo da visita:", React.createElement(Quote, null, "“É sobre a atualização do perfil da empresa no Google Meu Negócio.”")),
+                    React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "👋 *Se encontrar o dono:*")),
+                    React.createElement(Paragraph, null, "Apresente-se:", React.createElement(Quote, null, "“Sou Fagner Galvão, especialista em Google Meu Negócio.”")),
+                    React.createElement(Paragraph, null, "*Crie empatia e quebre o gelo:*", React.createElement(Quote, null, "“Estou aqui pra trazer mais clientes ou pacientes pra sua empresa – olha que proposta boa!”")),
+                    React.createElement(Paragraph, null, "Mostre autoridade:", React.createElement(Quote, null, "“Percebi que o perfil da sua empresa está desatualizado na maior plataforma de busca do mundo: o Google. Isso pode estar impedindo novos clientes de te encontrarem.”")),
+                    React.createElement(SubSectionTitle, null, "3️⃣ Solicitação de Tempo e Demonstração"),
+                    React.createElement(Paragraph, null, "🕒 ", React.createElement(Quote, null, "“Será rapidinho! Posso te mostrar em 5 minutos (Sabendo que pode levar de 30min a 1h) como sua empresa pode se apresentar de forma mais profissional no Google.”")),
+                    React.createElement(Paragraph, null, "*Mostre o perfil desatualizado do cliente e um modelo atualizado pela AG5 com:*"),
+                    React.createElement("ul", { className: "space-y-1 mb-3" },
+                        React.createElement(ListItem, null, "Serviços e produtos otimizados"),
+                        React.createElement(ListItem, null, "Links diretos para WhatsApp"),
+                        React.createElement(ListItem, null, "Fotos, vídeos e postagens recentes"),
+                        React.createElement(ListItem, null, "Interação e atualizações constantes")
+                    ),
+                    React.createElement(SubSectionTitle, null, "4️⃣ Apresentação do Serviço"),
+                    React.createElement(Paragraph, null, "📝 Explique de forma clara e objetiva:", React.createElement(Quote, null, "“Não vendemos posições no Google. Trabalhamos com um posicionamento correto e estratégico para atrair clientes qualificados, que chegam com intenção real de compra. Todos os acessos são direcionados diretamente para o WhatsApp ou telefone.”")),
+                    React.createElement(SubSectionTitle, null, "5️⃣ Mostre os Benefícios"),
+                    React.createElement(Paragraph, null, "Explique os 6 Pilares da Presença Digital no Google:"),
+                    React.createElement("ol", { className: "list-decimal list-inside space-y-1 mb-3 text-gray-300" },
+                        React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Segurança:"), " Perfil sempre atualizado."),
+                        React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Confiança:"), " Informações claras e oficiais."),
+                        React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Credibilidade:"), " Avaliações reais de clientes."),
+                        React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Praticidade:"), " Contatos diretos de atendimento."),
+                        React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Facilidade:"), " Tudo em um só lugar."),
+                        React.createElement("li", null, React.createElement("strong", { className: "text-gray-100" }, "Comparação assertiva:"), " Destaque em relação à concorrência.")
+                    ),
+                    React.createElement(SubSectionTitle, null, "6️⃣ Detalhamento dos Serviços"),
+                    React.createElement(Paragraph, null, "Mostre o formulário de serviços disponíveis:"),
+                    React.createElement("ul", { className: "space-y-1 mb-3" },
+                        React.createElement(ListItem, null, "Atualização de fotos, produtos e serviços"),
+                        React.createElement(ListItem, null, "Criação de postagens e conteúdos"),
+                        React.createElement(ListItem, null, "Integração com WhatsApp"),
+                        React.createElement(ListItem, null, "Otimização de palavras-chave"),
+                        React.createElement(ListItem, null, "Gerenciamento e atualização constante")
+                    ),
+                    React.createElement(Paragraph, null, "*Sempre pergunte:*", React.createElement(Quote, null, "“Faz sentido pra você ter a sua empresa atualizada e profissional dentro do Google?”")),
+                    React.createElement(SubSectionTitle, null, "7️⃣ Tire Dúvidas"),
+                    React.createElement(Paragraph, null, "*Pergunte diretamente:*", React.createElement(Quote, null, "“Ficou com alguma dúvida?”"), " Esteja preparado para responder com confiança e técnica."),
+                    React.createElement(SubSectionTitle, null, "8️⃣ Fechamento com Ancoragem de Preço"),
+                    React.createElement(Paragraph, null, "Use a técnica de ancoragem para mostrar o valor real:", React.createElement(Quote, null, "“Esse tipo de serviço em agências grandes pode custar até R$15 mil. Mas relaxa! Você não vai pagar nem R$10 mil, 8 mil, 5 mil, nem 3 mil!”")),
+                    React.createElement(Paragraph, null, "Oferta real:", React.createElement(Quote, null, "“Nossos pacotes vão de R$700 a R$2.000, dependendo da necessidade da sua empresa.”")),
+                    React.createElement(SubSectionTitle, null, "9️⃣ Objeções sobre o Valor"),
+                    React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "💰 Se o cliente achar caro:")),
+                    React.createElement(Paragraph, null, "Pergunte: ", React.createElement(Quote, null, "“Caro em comparação com o quê?”")),
+                    React.createElement(Paragraph, null, "Desafie: ", React.createElement(Quote, null, "“Se encontrar um perfil atualizado igual ao nosso, fazemos o seu de graça.”")),
+                    React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "💳 Se não tiver dinheiro na hora:")),
+                    React.createElement(Paragraph, null, React.createElement(Quote, null, "“Sem problema! Você pode pagar no cartão em até 12x com juros do próprio cartão.”")),
+                    React.createElement(Paragraph, null, React.createElement(Quote, null, "“Ou podemos dividir em até 2x sem juros no cartão.”")),
+                    React.createElement(SubSectionTitle, null, "🔟 Apresente o Gerenciamento Contínuo"),
+                    React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "📆 Pacote de gerenciamento mensal (R$150 a R$1.000)"), React.createElement("br", null), "Inclui:"),
+                    React.createElement("ul", { className: "space-y-1 mb-3" },
+                        React.createElement(ListItem, null, "✅ Resposta de todas as avaliações para fidelização."),
+                        React.createElement(ListItem, null, "✅ Atualização dos horários em feriados (Natal, Ano Novo, Carnaval, etc.)."),
+                        React.createElement(ListItem, null, "✅ Inclusão semanal de fotos e vídeos fornecidos pelo cliente."),
+                        React.createElement(ListItem, null, "✅ Atualização de produtos e serviços."),
+                        React.createElement(ListItem, null, "✅ Postagens semanais para gerar interação e rankeamento."),
+                        React.createElement(ListItem, null, "✅ Equipe dedicada para monitoramento e desempenho do perfil."),
+                        React.createElement(ListItem, null, "✅ Toda e qualquer atualização do Google será aplicada automaticamente ao perfil.")
+                    ),
+                    React.createElement(Paragraph, null, React.createElement("strong", { className: "text-green-400" }, "🎁 Bônus:")),
+                    React.createElement(Paragraph, null, "Placa de avaliação (valor R$67) para incentivar avaliações e melhorar o ranqueamento."),
+                    React.createElement(SectionTitle, null, "🚫 O que não devemos falar:"),
+                    React.createElement("ul", { className: "space-y-1 mb-3 text-red-400" },
+                        React.createElement(ListItem, null, "❌ “Vamos colocar sua empresa na primeira posição do Google.”"),
+                        React.createElement(ListItem, null, "❌ “Vendemos a primeira posição do Google.”"),
+                        React.createElement(ListItem, null, "❌ “Você vai vender mais.” (Nosso foco: atualização e atração de clientes qualificados)"),
+                        React.createElement(ListItem, null, "❌ “Trabalhamos para ou no Google.”"),
+                        React.createElement(ListItem, null, "❌ “Finalizamos em menos de 20 dias.”"),
+                        React.createElement(ListItem, null, "❌ “Vou te dar um site de vendas.” (Vendemos apenas landing pages)"),
+                        React.createElement(ListItem, null, "❌ “Vou dar as fotos 360°.” (As fotos são vendidas separadamente, a partir de R$80 cada)")
+                    )
+                ),
+                React.createElement(DarkButton, { onClick: () => setCurrentPage('home'), className: "mt-8", buttonColor: "bg-gray-700 hover:bg-gray-600" }, "🏠 Voltar para o Início")
+            );
+        };
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [isChatOpen, setIsChatOpen] = useState(false);
+            const [chatMessages, setChatMessages] = useState([]);
+            const [chatInput, setChatInput] = useState('');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [searchResults, setSearchResults] = useState([]);
+            const [showCompanyDetails, setShowCompanyDetails] = useState(false);
+            const [motivationalMessage, setMotivationalMessage] = useState(motivationalQuotes[0]);
+            const [modalInfo, setModalInfo] = useState({ isOpen: false, title: '', message: '' });
+
+            const showAlertModal = (title, message) => {
+                setModalInfo({ isOpen: true, title, message });
+            };
+            const closeModal = () => {
+                setModalInfo({ isOpen: false, title: '', message: '' });
+            };
+
+            const appBgColor = '#1a1a1a';
+
+            useEffect(() => {
+                const intervalId = setInterval(() => {
+                    const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+                    setMotivationalMessage(motivationalQuotes[randomIndex]);
+                }, 12 * 60 * 60 * 1000);
+
+                return () => clearInterval(intervalId);
+            }, []);
+
+            const handleAIMessage = async (message) => {
+                setChatMessages((prev) => [...prev, { sender: 'user', text: message }]);
+                setChatInput('');
+
+                let aiResponse = "Desculpe, não entendi sua pergunta. Posso ajudar com informações sobre os serviços da AG5, pesquisar empresas, ou sobre as funcionalidades do app.";
+
+                if (message.toLowerCase().includes('olá') || message.toLowerCase().includes('oi')) {
+                    aiResponse = "Olá! 👋 Como posso te ajudar hoje? Explore as funcionalidades do app ou me pergunte sobre os serviços da AG5.";
+                } else if (message.toLowerCase().includes('serviços')) {
+                    aiResponse = "A AG5 oferece: Atualização e Gerenciamento de Perfis no Google Meu Negócio, Foto 360°, Tour Virtual, Gerenciamento de Instagram, Tráfego Pago, e produtos como Placa Acrílica de Avaliações e Sites. 🚀";
+                } else if (message.toLowerCase().includes('equipe')) {
+                    aiResponse = "Nossa equipe inclui: Mauricio Areia (Diretor Operacional), Fagner Galvão (Diretor de Vendas), Demilson (Comercial), Helem Brito e Mylena Martins (Atualização de Perfil), Sara Areia (Gerenciamento de Perfil), Jullyane (Gerenciamento de Instagram), e parceiros para Criação de Site e Produtos. ✔️";
+                } else if (message.toLowerCase().includes('pesquisar empresa')) {
+                    aiResponse = "Para pesquisar uma empresa, digite o nome, categoria, produto ou serviço na barra de pesquisa da tela inicial. Os resultados aparecerão abaixo. Ao clicar em um resultado, você será direcionado para uma pesquisa no Google sobre a empresa. 🔍";
+                } else if (message.toLowerCase().includes('contato') || message.toLowerCase().includes('whatsapp')) {
+                    aiResponse = "Para falar diretamente com a equipe, você pode acessar os links no rodapé da página ou entrar em contato através do nosso site oficial. 📱";
+                } else if (message.toLowerCase().includes('notas e metas') || message.toLowerCase().includes('previsão') || message.toLowerCase().includes('comissão')) {
+                    aiResponse = "A página de 'Notas e Metas' está atualmente em construção. Em breve teremos novidades sobre essa funcionalidade! 😉";
+                } else if (message.toLowerCase().includes('obrigado') || message.toLowerCase().includes('valeu')) {
+                    aiResponse = "De nada! Estou aqui para ajudar. 😊";
+                }
+
+                setTimeout(() => {
+                    setChatMessages((prev) => [...prev, { sender: 'ai', text: aiResponse }]);
+                }, 500);
+            };
+
+            const handleSearch = (e) => {
+                const term = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                setSearchTerm(e.target.value);
+                if (term.trim().length > 0) {
+                    const filtered = companiesData.filter(company => {
+                        const companyNameNormalized = company.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        const companyCategoryNormalized = company.category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+                        const companyKeywordsNormalized = company.keywords.map(kw => kw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+
+                        // Correção: Garante que a pesquisa seja mais específica para a categoria.
+                        // Se o termo de busca estiver nas palavras-chave, verifica se a categoria da empresa também
+                        // é relevante ou se o termo é um nome/categoria direta.
+                        return companyNameNormalized.includes(term) ||
+                            companyCategoryNormalized.includes(term) ||
+                            companyKeywordsNormalized.some(kw => kw.includes(term) || term.includes(kw));
+                    });
+                    setSearchResults(filtered);
+                    setShowCompanyDetails(true);
+                } else {
+                    setSearchResults([]);
+                    setShowCompanyDetails(false);
+                }
+            };
+
+            const renderPage = () => {
+                const commonProps = { setCurrentPage, appBgColor, showAlertModal };
+                switch (currentPage) {
+                    case 'home':
+                        return React.createElement(HomePage, {
+                            ...commonProps,
+                            motivationalMessage,
+                            searchTerm,
+                            handleSearch,
+                            showCompanyDetails,
+                            searchResults,
+                            setShowCompanyDetails,
+                            isChatOpen,
+                            setIsChatOpen,
+                            chatMessages,
+                            chatInput,
+                            handleAIMessage,
+                            setChatInput
+                        });
+                    case 'client-results':
+                        return React.createElement(ClientResultsPage, commonProps);
+                    case 'sales-insights':
+                        return React.createElement(SalesInsightsPage, commonProps);
+                    default:
+                        return React.createElement(HomePage, {
+                            ...commonProps,
+                            motivationalMessage,
+                            searchTerm,
+                            handleSearch,
+                            showCompanyDetails,
+                            searchResults,
+                            setShowCompanyDetails,
+                            isChatOpen,
+                            setIsChatOpen,
+                            chatMessages,
+                            chatInput,
+                            handleAIMessage,
+                            setChatInput
+                        });
+                }
+            };
+
+            return (
+                React.createElement("div", { className: "font-sans antialiased" },
+                    renderPage(),
+                    React.createElement(Modal, { isOpen: modalInfo.isOpen, onClose: closeModal, title: modalInfo.title }, modalInfo.message)
+                )
+            );
+        }
+
+        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    </script>
+</body>
+
+</html>
