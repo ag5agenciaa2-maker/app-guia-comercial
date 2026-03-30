@@ -201,6 +201,240 @@
             );
         };
 
+        // Modal de Preview de Vídeo do Instagram
+        const VideoPreviewModal = ({ isOpen, onClose, video }) => {
+            if (!isOpen || !video) return null;
+
+            const handleOpenExternal = () => {
+                window.open(video.url, '_blank');
+            };
+
+            // Extrair o código do reel da URL para o embed
+            const getEmbedUrl = (url) => {
+                const match = url.match(/\/reel\/([A-Za-z0-9_-]+)/);
+                if (match) {
+                    return `https://www.instagram.com/reel/${match[1]}/embed`;
+                }
+                return url;
+            };
+
+            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[300] p-2 md:p-4" },
+                React.createElement("div", { className: "bg-[#1a1a1a] rounded-xl shadow-2xl h-[95vh] md:h-[90vh] border border-gray-700 flex flex-col" },
+                    // Header
+                    React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-700 bg-[#252525] rounded-t-xl" },
+                        React.createElement("div", { className: "flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2" },
+                            React.createElement("div", { className: "w-8 h-8 md:w-10 md:h-10 rounded-lg bg-pink-500/20 flex items-center justify-center flex-shrink-0" },
+                                React.createElement("span", { className: "text-lg md:text-xl" }, "🎬")
+                            ),
+                            React.createElement("div", { className: "min-w-0 flex-1" },
+                                React.createElement("h3", { className: "text-sm md:text-lg font-semibold text-white truncate" }, video.titulo),
+                                React.createElement("p", { className: "text-[10px] md:text-xs text-gray-400 truncate" }, video.descricao),
+                                // Botão mobile - abaixo do link
+                                React.createElement("button", { 
+                                    onClick: handleOpenExternal,
+                                    className: "md:hidden mt-2 px-3 py-1.5 bg-pink-600 hover:bg-pink-700 text-white text-xs rounded transition-colors flex items-center gap-1.5 w-fit"
+                                },
+                                    React.createElement("span", null, "Abrir no Instagram"),
+                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
+                                    )
+                                )
+                            )
+                        ),
+                        // Apenas o X no canto superior direito
+                        React.createElement("div", { className: "flex items-center gap-2 flex-shrink-0" },
+                            // Botão desktop - ao lado do X
+                            React.createElement("button", { 
+                                onClick: handleOpenExternal,
+                                className: "hidden md:flex px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white text-sm rounded-lg transition-colors items-center gap-2"
+                            },
+                                React.createElement("span", null, "Abrir no Instagram"),
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
+                                )
+                            ),
+                            React.createElement("button", { onClick: onClose, className: "p-1.5 md:p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                                )
+                            )
+                        )
+                    ),
+                    // Container do vídeo em formato 9:16
+                    React.createElement("div", { className: "flex-1 relative bg-black flex items-center justify-center overflow-hidden" },
+                        // Wrapper com aspect ratio 9:16 (vertical)
+                        React.createElement("div", { className: "relative h-full max-h-full", style: { aspectRatio: '9/16', maxWidth: '100%' } },
+                            React.createElement("iframe", {
+                                src: getEmbedUrl(video.url),
+                                className: "absolute inset-0 w-full h-full border-0",
+                                allowTransparency: true,
+                                frameBorder: 0,
+                                scrolling: "no",
+                                title: video.titulo
+                            })
+                        )
+                    )
+                )
+            );
+        };
+
+        // Modal de Vídeos Comerciais
+        const VideosComerciaisModal = ({ isOpen, onClose }) => {
+            const [categoriaAtiva, setCategoriaAtiva] = useState('depoimentos');
+            const [videoSelecionado, setVideoSelecionado] = useState(null);
+
+            const categorias = {
+                depoimentos: {
+                    titulo: 'Depoimentos de Clientes',
+                    icone: '💬',
+                    videos: [
+                        { titulo: 'Andreza Ramos - Estúdio de Fotografia', descricao: 'Depoimento falando dos resultados', url: 'https://www.instagram.com/reel/DRw8AuXDU8M/', thumbnail: 'assets/andreza-ramos.png' },
+                        { titulo: 'Dra. Aline - Presidente OAB/RJ', descricao: 'Posicionamento no Google para escritórios de advocacia', url: 'https://www.instagram.com/reel/DQ66hy_ET0Z/', thumbnail: 'assets/Dra. Aline.png' },
+                        { titulo: 'Nayara Ribeiro - Advogada Imobiliária', descricao: 'Presidente da Comissão de Direitos Imobiliários OAB 29º', url: 'https://www.instagram.com/reel/DPyYm-YDXaa/', thumbnail: 'assets/Dra. Nayara.png' },
+                        { titulo: 'Júnior - Shineray/SV Automóveis', descricao: 'Concessionária de Carros, Motos e Aluguel', url: 'https://www.instagram.com/reel/DPeYL0FDZzq/', thumbnail: 'assets/Junior Shineray.png' },
+                        { titulo: 'Dra. Ana Beatriz e Dra. Luana', descricao: 'Visibilidade no Google para escritórios', url: 'https://www.instagram.com/reel/DO61sjTj49e/' },
+                        { titulo: 'Advogada - Albuquerque Lima', descricao: 'Luana - Presidente da Comissão de Marketing OAB 29º', url: 'https://www.instagram.com/reel/DOgkvYBjTtL/', thumbnail: 'assets/Dra. Luana.png' },
+                        { titulo: 'Yago - Imobiliária', descricao: 'Comprador da República Checa em 10 dias', url: 'https://www.instagram.com/reel/DNa2TTSN1zt/', thumbnail: 'assets/Yago Imobiliaria.png' },
+                        { titulo: 'Magno - Material de Construção', descricao: 'Depoimento de cliente', url: 'https://www.instagram.com/reel/DIjqWxlPSAb/', thumbnail: 'assets/Magno.png' }
+                    ]
+                },
+                eventos: {
+                    titulo: 'Eventos e Parcerias',
+                    icone: '🎉',
+                    videos: [
+                        { titulo: 'Patrocínio OAB com Euro', descricao: 'Evento da OAB patrocinado pela AG5', url: 'https://www.instagram.com/reel/DP9MLkKjec_/', thumbnail: 'assets/Patrocionio.png' },
+                        { titulo: 'Palestra AG5 - Depoimento', descricao: 'Feedback sobre evento que palestramos', url: 'https://www.instagram.com/reel/DO61sjTj49e/', thumbnail: 'assets/Evento Craque do Pão.png' }
+                    ]
+                },
+                utilidades: {
+                    titulo: 'Vídeos Úteis',
+                    icone: '📚',
+                    videos: [
+                        { titulo: 'Notícia Jornal Nacional', descricao: 'Sobre Avaliações no Google', url: 'https://www.instagram.com/reel/DPT8sujDfSz/', thumbnail: 'assets/Jornal-Band.png' },
+                        { titulo: 'Treinamento Pega a Senha', descricao: 'Conteúdo de capacitação', url: 'https://www.instagram.com/reel/DB9hkQfxm52/' }
+                    ]
+                }
+            };
+
+            const abrirVideo = (video) => {
+                setVideoSelecionado(video);
+            };
+
+            const fecharVideoPreview = () => {
+                setVideoSelecionado(null);
+            };
+
+            if (!isOpen) return null;
+
+            return React.createElement(React.Fragment, null,
+                React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4" },
+                    React.createElement("div", { className: "bg-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-5xl h-[95vh] md:h-[90vh] border border-gray-700 flex flex-col" },
+                        // Header
+                        React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-700 bg-[#252525] rounded-t-xl" },
+                            React.createElement("div", { className: "flex items-center gap-3" },
+                                React.createElement("div", { className: "w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center" },
+                                    React.createElement("span", { className: "text-xl" }, "🎬")
+                                ),
+                                React.createElement("div", null,
+                                    React.createElement("h3", { className: "text-lg font-semibold text-white" }, "Vídeos Comerciais"),
+                                    React.createElement("p", { className: "text-xs text-gray-400" }, "Clique para assistir no app")
+                                )
+                            ),
+                            React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                                )
+                            )
+                        ),
+                        // Abas de Categoria
+                        React.createElement("div", { className: "flex border-b border-gray-700 overflow-x-auto" },
+                            Object.keys(categorias).map((key) => (
+                                React.createElement("button", {
+                                    key: key,
+                                    onClick: () => setCategoriaAtiva(key),
+                                    className: `flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
+                                        categoriaAtiva === key 
+                                            ? 'text-pink-400 border-b-2 border-pink-400 bg-pink-500/10' 
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    }`
+                                },
+                                    React.createElement("span", null, categorias[key].icone),
+                                    React.createElement("span", null, categorias[key].titulo)
+                                )
+                            ))
+                        ),
+                        // Lista de Vídeos
+                        React.createElement("div", { className: "flex-1 overflow-y-auto custom-scrollbar p-4" },
+                            React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+                                categorias[categoriaAtiva].videos.map((video, index) => (
+                                    React.createElement("div", {
+                                        key: index,
+                                        onClick: () => abrirVideo(video),
+                                        className: "bg-[#252525] border border-gray-700 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 hover:bg-[#2a2a2a] transition-all group"
+                                    },
+                                        // Thumbnail ou ícone de play
+                                        video.thumbnail ? (
+                                            React.createElement("div", { className: "flex items-start gap-3 p-3" },
+                                                React.createElement("div", { className: "relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden" },
+                                                    React.createElement("img", {
+                                                        src: video.thumbnail,
+                                                        alt: video.titulo,
+                                                        className: "w-full h-full object-cover"
+                                                    }),
+                                                    React.createElement("div", { className: "absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/10 transition-colors" },
+                                                        React.createElement("div", { className: "w-8 h-8 rounded-full bg-pink-500/80 flex items-center justify-center group-hover:scale-110 transition-transform" },
+                                                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4 text-white", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" })
+                                                            )
+                                                        )
+                                                    )
+                                                ),
+                                                React.createElement("div", { className: "flex-1 min-w-0" },
+                                                    React.createElement("h4", { className: "text-white font-semibold text-sm mb-1 group-hover:text-pink-400 transition-colors" }, video.titulo),
+                                                    React.createElement("p", { className: "text-gray-400 text-xs line-clamp-2" }, video.descricao),
+                                                    React.createElement("div", { className: "mt-2 flex items-center gap-1 text-pink-400 text-xs" },
+                                                        React.createElement("span", null, "Assistir"),
+                                                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" })
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        ) : (
+                                            React.createElement("div", { className: "flex items-start gap-4 p-4" },
+                                                React.createElement("div", { className: "w-16 h-16 rounded-lg bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" },
+                                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-pink-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" }),
+                                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z" })
+                                                    )
+                                                ),
+                                                React.createElement("div", { className: "flex-1 min-w-0" },
+                                                    React.createElement("h4", { className: "text-white font-semibold text-sm mb-1 group-hover:text-pink-400 transition-colors" }, video.titulo),
+                                                    React.createElement("p", { className: "text-gray-400 text-xs line-clamp-2" }, video.descricao)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ))
+                            )
+                        ),
+                        // Footer
+                        React.createElement("div", { className: "p-4 border-t border-gray-700 bg-[#252525] rounded-b-xl" },
+                            React.createElement("p", { className: "text-center text-gray-500 text-xs" }, 
+                                `${categorias[categoriaAtiva].videos.length} vídeos disponíveis em ${categorias[categoriaAtiva].titulo}`
+                            )
+                        )
+                    )
+                ),
+                // Preview do vídeo selecionado
+                React.createElement(VideoPreviewModal, {
+                    isOpen: !!videoSelecionado,
+                    onClose: fecharVideoPreview,
+                    video: videoSelecionado
+                })
+            );
+        };
+
         // Modal de Preview do Site
         const SitePreviewModal = ({ isOpen, onClose, company }) => {
             if (!isOpen || !company) return null;
@@ -395,7 +629,7 @@
             companiesData,
             showAlertModal,
             setShowSitesModal,
-            setOdooPreview
+            setShowVideosModal
         }) => {
 
             const handleCompanyClick = (company) => {
@@ -539,7 +773,7 @@
 
                 React.createElement("div", { className: "w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-4" },
                     React.createElement("div", { className: "md:col-span-2 grid grid-cols-2 gap-4" },
-                        React.createElement(DarkButton, { onClick: () => showAlertModal('Em Breve', 'Módulo de treinamento em vídeo.'), className: "h-32" }, "🎬 Tutoriais"),
+                        React.createElement(DarkButton, { onClick: () => setShowVideosModal(true), className: "h-32" }, "🎬 Vídeos Comerciais"),
                         React.createElement(DarkButton, { onClick: () => window.open('https://www.superchat.com/pt/tools/google-review-link-generator', '_blank'), className: "h-32" }, "⭐ Google Link"),
                         React.createElement(DarkButton, { onClick: () => setCurrentPage('client-results'), className: "h-32" }, "📊 Resultados"),
                         React.createElement(DarkButton, { onClick: () => window.open('https://drive.google.com/drive/folders/1Tq7zhcjDhXTxJ5q2T7vtJfyNqTF7W-7N', '_blank'), className: "h-32" }, "💬 Feedbacks")
@@ -548,9 +782,9 @@
                         React.createElement(DarkButton, { onClick: () => setCurrentPage('sales-insights'), className: "flex-1" }, "💡 Insights"),
                         React.createElement(DarkButton, { onClick: () => showAlertModal('Em Breve', 'Módulo de metas em desenvolvimento.'), className: "flex-1" }, "🎯 Metas"),
                         React.createElement(DarkButton, {
-                            onClick: () => setOdooPreview(true),
-                            buttonColor: "bg-green-600/10 hover:bg-green-600/20",
-                            className: "flex-1 border-green-500/30"
+                            onClick: () => window.open('https://ag5.conexaoazul.com/odoo/crm', '_blank'),
+                            buttonColor: "bg-purple-600/10 hover:bg-purple-600/20",
+                            className: "flex-1 border-purple-500/30"
                         }, "🔗 CRM ODOO")
                     )
                 ),
@@ -612,7 +846,8 @@
             const [motivationalMessage, setMotivationalMessage] = useState(motivationalQuotes[0]);
             const [modalInfo, setModalInfo] = useState({ isOpen: false, title: '', message: '' });
             const [showSitesModal, setShowSitesModal] = useState(false);
-            const [showOdooPreview, setOdooPreview] = useState(false);
+            const [showVideosModal, setShowVideosModal] = useState(false);
+
 
             const showAlertModal = (title, message) => setModalInfo({ isOpen: true, title, message });
             const closeModal = () => setModalInfo({ isOpen: false, title: '', message: '' });
@@ -675,66 +910,14 @@
                     appBgColor, motivationalMessage, searchTerm, handleSearch,
                     showCompanyDetails, searchResults, setShowCompanyDetails,
                     setCurrentPage, companiesData, showAlertModal, setShowSitesModal,
-                    setOdooPreview
+                    setShowVideosModal
                 }) :
                     currentPage === 'client-results' ? React.createElement(ClientResultsPage, { setCurrentPage, appBgColor, showAlertModal }) :
                         React.createElement(SalesInsightsPage, { setCurrentPage, appBgColor }),
                 React.createElement(Modal, { isOpen: modalInfo.isOpen, onClose: closeModal, title: modalInfo.title }, modalInfo.message),
                 React.createElement(SitesSearchModal, { isOpen: showSitesModal, onClose: () => setShowSitesModal(false), companiesData }),
-                // Preview do CRM ODOO
-                React.createElement("div", { className: `fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4 ${showOdooPreview ? '' : 'hidden'}` },
-                    React.createElement("div", { className: "bg-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-6xl h-[95vh] md:h-[90vh] border border-gray-700 flex flex-col" },
-                        // Header
-                        React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-700 bg-[#252525] rounded-t-xl" },
-                            React.createElement("div", { className: "flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2" },
-                                React.createElement("div", { className: "w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0" },
-                                    React.createElement("span", { className: "text-lg md:text-xl" }, "🔗")
-                                ),
-                                React.createElement("div", { className: "min-w-0 flex-1" },
-                                    React.createElement("h3", { className: "text-sm md:text-lg font-semibold text-white truncate" }, "CRM ODOO"),
-                                    React.createElement("p", { className: "text-[10px] md:text-xs text-gray-400 truncate" }, "ag5.conexaoazul.com/odoo/crm"),
-                                    // Botão mobile - abaixo do link
-                                    React.createElement("button", { 
-                                        onClick: () => window.open('https://ag5.conexaoazul.com/odoo/crm', '_blank'),
-                                        className: "md:hidden mt-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors flex items-center gap-1.5 w-fit"
-                                    },
-                                        React.createElement("span", null, "Abrir em Nova Aba"),
-                                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
-                                        )
-                                    )
-                                )
-                            ),
-                            // Apenas o X no canto superior direito
-                            React.createElement("div", { className: "flex items-center gap-2 flex-shrink-0" },
-                                // Botão desktop - ao lado do X
-                                React.createElement("button", { 
-                                    onClick: () => window.open('https://ag5.conexaoazul.com/odoo/crm', '_blank'),
-                                    className: "hidden md:flex px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors items-center gap-2"
-                                },
-                                    React.createElement("span", null, "Abrir em Nova Aba"),
-                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
-                                    )
-                                ),
-                                React.createElement("button", { onClick: () => setOdooPreview(false), className: "p-1.5 md:p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
-                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
-                                    )
-                                )
-                            )
-                        ),
-                        // Iframe
-                        React.createElement("div", { className: "flex-1 relative bg-white" },
-                            React.createElement("iframe", {
-                                src: "https://ag5.conexaoazul.com/odoo/crm",
-                                className: "w-full h-full border-0",
-                                sandbox: "allow-scripts allow-same-origin allow-forms allow-popups",
-                                title: "CRM ODOO"
-                            })
-                        )
-                    )
-                )
+                // Modal de Vídeos Comerciais
+                React.createElement(VideosComerciaisModal, { isOpen: showVideosModal, onClose: () => setShowVideosModal(false) })
             );
         }
 
