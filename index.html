@@ -426,11 +426,16 @@
                             };
                             return {
                                 id: getVal(['id']) || Math.random(),
-                                name: getVal(['nome', 'name']),
+                                name: getVal(['nome da empresa', 'nome', 'name']),
                                 category: getVal(['categoria', 'category']),
-                                link: getVal(['link']) || "N/A",
-                                type: getVal(['tipo', 'type', 'status']) || "Geral",
-                                keywords: (getVal(['keywords', 'palavras-chave']) || "").split(',').map(k => k.trim()).filter(Boolean)
+                                link: getVal(['link perfil google', 'link']) || "N/A",
+                                type: getVal(['serviço google', 'tipo', 'type', 'status']) || "Geral",
+                                keywords: (getVal(['keywords', 'palavras-chave']) || "").split(',').map(k => k.trim()).filter(Boolean),
+                                dataInicio: getVal(['data de início google', 'data inicio']),
+                                dataConclusao: getVal(['data conclusão google', 'data conclusao']),
+                                tipoSite: getVal(['tipo de site', 'tipo site']),
+                                link360: getVal(['link 360']),
+                                linkSiteSEO: getVal(['link site personalizados e seo', 'link site'])
                             };
 
                         }).filter(item => item.name);
