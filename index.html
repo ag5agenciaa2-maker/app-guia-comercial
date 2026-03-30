@@ -201,6 +201,164 @@
             );
         };
 
+        // Modal de Preview do Site
+        const SitePreviewModal = ({ isOpen, onClose, company }) => {
+            if (!isOpen || !company) return null;
+
+            const handleOpenExternal = () => {
+                window.open(company.linkSiteSEO, '_blank');
+            };
+
+            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-4" },
+                React.createElement("div", { className: "bg-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] border border-gray-700 flex flex-col" },
+                    // Header
+                    React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-700 bg-[#252525] rounded-t-xl" },
+                        React.createElement("div", { className: "flex items-center gap-3" },
+                            React.createElement("div", { className: "w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center" },
+                                React.createElement("span", { className: "text-xl" }, "🌐")
+                            ),
+                            React.createElement("div", null,
+                                React.createElement("h3", { className: "text-lg font-semibold text-white" }, company.name),
+                                React.createElement("p", { className: "text-xs text-gray-400 truncate max-w-md" }, company.linkSiteSEO)
+                            )
+                        ),
+                        React.createElement("div", { className: "flex items-center gap-3" },
+                            React.createElement("button", { 
+                                onClick: handleOpenExternal,
+                                className: "px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+                            },
+                                React.createElement("span", null, "Abrir em Nova Aba"),
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
+                                )
+                            ),
+                            React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                                )
+                            )
+                        )
+                    ),
+                    // Iframe
+                    React.createElement("div", { className: "flex-1 relative bg-white" },
+                        React.createElement("iframe", {
+                            src: company.linkSiteSEO,
+                            className: "w-full h-full border-0",
+                            sandbox: "allow-scripts allow-same-origin allow-forms allow-popups",
+                            title: `Preview - ${company.name}`
+                        })
+                    )
+                )
+            );
+        };
+
+        // Modal de busca para Sites Personalizados
+        const SitesSearchModal = ({ isOpen, onClose, companiesData }) => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [searchResults, setSearchResults] = useState([]);
+            const [previewCompany, setPreviewCompany] = useState(null);
+
+            useEffect(() => {
+                if (!isOpen) {
+                    setSearchTerm('');
+                    setSearchResults([]);
+                    setPreviewCompany(null);
+                }
+            }, [isOpen]);
+
+            const handleSearch = (e) => {
+                const term = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                setSearchTerm(e.target.value);
+
+                if (term.length > 0) {
+                    // Filtrar apenas empresas que têm link de site personalizado
+                    const filtered = companiesData.filter(company => {
+                        const hasSite = company.linkSiteSEO && company.linkSiteSEO !== "N/A" && company.linkSiteSEO.trim() !== "";
+                        if (!hasSite) return false;
+
+                        const name = (company.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        const kws = (company.keywords || []).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+
+                        return name.includes(term) || kws.some(k => k.includes(term));
+                    });
+                    setSearchResults(filtered);
+                } else {
+                    setSearchResults([]);
+                }
+            };
+
+            const handleSiteClick = (company) => {
+                if (company.linkSiteSEO && company.linkSiteSEO !== "N/A") {
+                    setPreviewCompany(company);
+                }
+            };
+
+            const closePreview = () => {
+                setPreviewCompany(null);
+            };
+
+            if (!isOpen) return null;
+
+            return React.createElement(React.Fragment, null,
+                React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4" },
+                    React.createElement("div", { className: "bg-[#2c2c2c] p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-700" },
+                        React.createElement("div", { className: "flex justify-between items-center mb-4" },
+                            React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, "🌐 Sites Personalizados"),
+                            React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                                )
+                            )
+                        ),
+                        React.createElement("div", { className: "mb-4" },
+                            React.createElement("input", {
+                                type: "text",
+                                className: "w-full pl-4 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 transition-all text-sm backdrop-blur-xl",
+                                placeholder: "Buscar por nome ou palavras-chave...",
+                                value: searchTerm,
+                                onChange: handleSearch,
+                                autoFocus: true
+                            })
+                        ),
+                        React.createElement("div", { className: "max-h-80 overflow-y-auto custom-scrollbar" },
+                            searchResults.length > 0 ? (
+                                searchResults.map((company) => (
+                                    React.createElement("div", {
+                                        key: company.id,
+                                        onClick: () => handleSiteClick(company),
+                                        className: "hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-all flex justify-between items-center group border-b border-white/5 last:border-0"
+                                    },
+                                        React.createElement("div", { className: "flex-1" },
+                                            React.createElement("p", { className: "font-semibold text-white group-hover:text-green-400 transition-colors text-sm" }, company.name),
+                                            React.createElement("p", { className: "text-[10px] text-gray-500 mt-1 truncate" }, company.keywords?.slice(0, 3).join(", "))
+                                        ),
+                                        React.createElement("span", { className: "text-green-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg" }, "→")
+                                    )
+                                ))
+                            ) : searchTerm.length > 0 ? (
+                                React.createElement("div", { className: "p-8 text-center text-mono text-gray-500" }, `Nenhum site encontrado para: ${searchTerm}`)
+                            ) : (
+                                React.createElement("div", { className: "p-6 text-center text-gray-500 text-sm" }, 
+                                    "Digite o nome do cliente ou palavras-chave para buscar sites personalizados"
+                                )
+                            )
+                        ),
+                        React.createElement("div", { className: "mt-4 pt-3 border-t border-white/10 flex justify-between items-center" },
+                            React.createElement("span", { className: "text-[10px] text-gray-500" }, 
+                                `${companiesData.filter(c => c.linkSiteSEO && c.linkSiteSEO !== "N/A" && c.linkSiteSEO.trim() !== "").length} sites disponíveis`
+                            ),
+                            React.createElement("button", { onClick: onClose, className: "text-xs text-gray-400 hover:text-white transition-colors" }, "Fechar")
+                        )
+                    )
+                ),
+                React.createElement(SitePreviewModal, {
+                    isOpen: !!previewCompany,
+                    onClose: closePreview,
+                    company: previewCompany
+                })
+            );
+        };
+
         const DarkButton = ({ children, onClick, className = '', buttonColor = 'bg-[#0a0a0a]', icon = null, style = {} }) => {
             return React.createElement("button", {
                 onClick: onClick,
@@ -223,7 +381,8 @@
             setShowCompanyDetails,
             setCurrentPage,
             companiesData,
-            showAlertModal
+            showAlertModal,
+            setShowSitesModal
         }) => {
 
             const handleCompanyClick = (company) => {
@@ -237,6 +396,11 @@
                 }
                 setShowCompanyDetails(false);
             };
+
+            // Contadores
+            const totalSitesPadrao = companiesData.filter(c => c.tipoSite && c.tipoSite.toLowerCase().includes('padr')).length;
+            const totalSitesPerson = companiesData.filter(c => c.tipoSite && c.tipoSite.toLowerCase().includes('person')).length;
+            const total360 = companiesData.filter(c => c.link360 && c.link360 !== "N/A" && c.link360.trim() !== "").length;
 
             return React.createElement("div", { className: "relative min-h-screen flex flex-col items-center justify-start p-6 md:p-16 overflow-hidden animate-fade-in" },
                 React.createElement("div", { className: "mesh-bg" }),
@@ -292,10 +456,37 @@
                     // Coluna 3: Insights
                     React.createElement("div", { className: "p-6 glass-panel rounded-2xl border-l-2 border-yellow-500/50 flex flex-col justify-center" },
                         React.createElement("div", { className: "text-mono mb-2" }, "Insights do Dia"),
-                        React.createElement("p", { className: "text-gray-400 text-sm italic font-light leading-relaxed" }, `“${motivationalMessage}”`)
+                        React.createElement("p", { className: "text-gray-400 text-sm italic font-light leading-relaxed" }, `"${motivationalMessage}"`)
                     )
                 ),
 
+                // Nova linha de estatísticas: Sites e Links 360
+                React.createElement("div", { className: "w-full max-w-6xl grid grid-cols-2 md:grid-cols-3 gap-4 mb-12" },
+                    React.createElement("div", { className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between" },
+                        React.createElement("div", null,
+                            React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Sites Padrão"),
+                            React.createElement("div", { className: "text-3xl font-bold text-blue-400 tracking-tighter" }, totalSitesPadrao)
+                        ),
+                        React.createElement("span", { className: "text-2xl" }, "🌐")
+                    ),
+                    React.createElement("div", {
+                        className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between cursor-pointer hover:border-cyan-500/40 hover:shadow-cyan-500/10 hover:shadow-lg transition-all",
+                        onClick: () => setShowSitesModal(true)
+                    },
+                        React.createElement("div", null,
+                            React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Sites Person."),
+                            React.createElement("div", { className: "text-3xl font-bold text-cyan-400 tracking-tighter" }, totalSitesPerson)
+                        ),
+                        React.createElement("span", { className: "text-2xl" }, "✨")
+                    ),
+                    React.createElement("div", { className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between" },
+                        React.createElement("div", null,
+                            React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Links 360"),
+                            React.createElement("div", { className: "text-3xl font-bold text-purple-400 tracking-tighter" }, total360)
+                        ),
+                        React.createElement("span", { className: "text-2xl" }, "📷")
+                    ),
+                ),
 
                 React.createElement("div", { className: "w-full max-w-2xl mb-12 relative" },
                     React.createElement("div", { className: "absolute -inset-1 bg-gradient-to-r from-green-500/10 to-transparent rounded-2xl blur opacity-20 transition duration-1000" }),
@@ -342,9 +533,9 @@
                     ),
                     React.createElement("div", { className: "flex flex-col gap-4" },
                         React.createElement(DarkButton, { onClick: () => setCurrentPage('sales-insights'), className: "flex-1" }, "💡 Insights"),
-                        React.createElement(DarkButton, { onClick: () => showAlertModal('Em Construção', 'Desenvolvimento acelerado.'), className: "flex-1" }, "📝 Metas"),
+                        React.createElement(DarkButton, { onClick: () => showAlertModal('Em Breve', 'Módulo de metas em desenvolvimento.'), className: "flex-1" }, "🎯 Metas"),
                         React.createElement(DarkButton, {
-                            onClick: () => showAlertModal('Redirecionamento', 'Abrindo HUB de Vendas...'),
+                            onClick: () => window.open('https://ag5.conexaoazul.com/odoo/crm', '_blank'),
                             buttonColor: "bg-green-600/10 hover:bg-green-600/20",
                             className: "flex-1 border-green-500/30"
                         }, "🔗 CRM ODOO")
@@ -407,6 +598,7 @@
             const [showCompanyDetails, setShowCompanyDetails] = useState(false);
             const [motivationalMessage, setMotivationalMessage] = useState(motivationalQuotes[0]);
             const [modalInfo, setModalInfo] = useState({ isOpen: false, title: '', message: '' });
+            const [showSitesModal, setShowSitesModal] = useState(false);
 
             const showAlertModal = (title, message) => setModalInfo({ isOpen: true, title, message });
             const closeModal = () => setModalInfo({ isOpen: false, title: '', message: '' });
@@ -468,11 +660,12 @@
                 currentPage === 'home' ? React.createElement(HomePage, {
                     appBgColor, motivationalMessage, searchTerm, handleSearch,
                     showCompanyDetails, searchResults, setShowCompanyDetails,
-                    setCurrentPage, companiesData, showAlertModal
+                    setCurrentPage, companiesData, showAlertModal, setShowSitesModal
                 }) :
                     currentPage === 'client-results' ? React.createElement(ClientResultsPage, { setCurrentPage, appBgColor, showAlertModal }) :
                         React.createElement(SalesInsightsPage, { setCurrentPage, appBgColor }),
-                React.createElement(Modal, { isOpen: modalInfo.isOpen, onClose: closeModal, title: modalInfo.title }, modalInfo.message)
+                React.createElement(Modal, { isOpen: modalInfo.isOpen, onClose: closeModal, title: modalInfo.title }, modalInfo.message),
+                React.createElement(SitesSearchModal, { isOpen: showSitesModal, onClose: () => setShowSitesModal(false), companiesData })
             );
         }
 
