@@ -154,7 +154,7 @@
     <div id="root"></div>
 
     <script>
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect, useMemo, useRef } = React;
 
         const motivationalQuotes = [
             "Acredite em você mesmo e tudo será possível. ✨",
@@ -759,25 +759,43 @@
             const [searchTerm, setSearchTerm] = useState('');
             const [previewCompany, setPreviewCompany] = useState(null);
             const [isPlaying, setIsPlaying] = useState(false);
+            const audioRef = useRef(null);
 
-            // Efeito para monitorar o áudio
+            // Inicializar referência do áudio
             useEffect(() => {
-                const audio = document.getElementById('depoimento-audio');
-                if (audio) {
-                    const handlePlay = () => setIsPlaying(true);
-                    const handlePause = () => setIsPlaying(false);
-                    const handleEnded = () => setIsPlaying(false);
-                    
-                    audio.addEventListener('play', handlePlay);
-                    audio.addEventListener('pause', handlePause);
-                    audio.addEventListener('ended', handleEnded);
-                    
-                    return () => {
-                        audio.removeEventListener('play', handlePlay);
-                        audio.removeEventListener('pause', handlePause);
-                        audio.removeEventListener('ended', handleEnded);
-                    };
+                if (isOpen) {
+                    audioRef.current = document.getElementById('depoimento-audio');
                 }
+            }, [isOpen]);
+
+            // Função para controlar play/pause
+            const toggleAudio = () => {
+                const audio = audioRef.current;
+                if (!audio) return;
+                
+                if (audio.paused) {
+                    audio.play().then(() => {
+                        setIsPlaying(true);
+                    }).catch(err => {
+                        console.log('Erro ao tocar:', err);
+                    });
+                } else {
+                    audio.pause();
+                    setIsPlaying(false);
+                }
+            };
+
+            // Atualizar estado quando o áudio termina
+            useEffect(() => {
+                const audio = audioRef.current;
+                if (!audio) return;
+                
+                const handleEnded = () => setIsPlaying(false);
+                audio.addEventListener('ended', handleEnded);
+                
+                return () => {
+                    audio.removeEventListener('ended', handleEnded);
+                };
             }, [isOpen]);
 
             // Apenas empresas com Link 360
@@ -871,17 +889,8 @@
                                 React.createElement("div", { className: "flex items-start gap-4" },
                                     // Botão de play customizado com animação
                                     React.createElement("button", {
-                                        onClick: () => {
-                                            const audio = document.getElementById('depoimento-audio');
-                                            if (audio) {
-                                                if (audio.paused) {
-                                                    audio.play();
-                                                } else {
-                                                    audio.pause();
-                                                }
-                                            }
-                                        },
-                                        className: `w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${isPlaying ? 'bg-purple-500 animate-pulse' : 'bg-purple-500/20 hover:bg-purple-500/30'}`
+                                        onClick: toggleAudio,
+                                        className: `w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${isPlaying ? 'bg-purple-500' : 'bg-purple-500/20 hover:bg-purple-500/30'}`
                                     },
                                         isPlaying ? 
                                             // Ícone de pause quando está tocando
@@ -910,7 +919,7 @@
                                         React.createElement("div", { className: "w-full h-1 bg-gray-700 rounded-full overflow-hidden" },
                                             React.createElement("div", { className: "h-full bg-purple-500 w-0" })
                                         ),
-                                        React.createElement("p", { className: `text-[10px] mt-1 ${isPlaying ? 'text-purple-400 animate-pulse' : 'text-gray-500'}` }, 
+                                        React.createElement("p", { className: `text-[10px] mt-1 ${isPlaying ? 'text-purple-400' : 'text-gray-500'}` }, 
                                             isPlaying ? '▶ Tocando...' : 'Clique no ícone para ouvir'
                                         )
                                     )
