@@ -688,37 +688,34 @@
             );
         };
 
-        // Modal de busca para Links 360 (Fotos Instagram)
+        // Modal de Repositório de Links 360 (estilo Tour Virtual)
         const Links360SearchModal = ({ isOpen, onClose, companiesData }) => {
             const [searchTerm, setSearchTerm] = useState('');
-            const [searchResults, setSearchResults] = useState([]);
+
+            // Apenas empresas com Link 360
+            const links360 = useMemo(() => {
+                return companiesData.filter(c => c.link360 && c.link360 !== "N/A" && c.link360.trim() !== "");
+            }, [companiesData]);
+
+            // Filtrar por busca
+            const itemsFiltrados = useMemo(() => {
+                if (!searchTerm.trim()) return links360;
+
+                const term = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                return links360.filter(item => {
+                    const name = (item.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const category = (item.category || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const kws = (item.keywords || []).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+
+                    return name.includes(term) || category.includes(term) || kws.some(k => k.includes(term));
+                });
+            }, [searchTerm, links360]);
 
             useEffect(() => {
                 if (!isOpen) {
                     setSearchTerm('');
-                    setSearchResults([]);
                 }
             }, [isOpen]);
-
-            const handleSearch = (e) => {
-                const term = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-                setSearchTerm(e.target.value);
-
-                if (term.length > 0) {
-                    const filtered = companiesData.filter(company => {
-                        const hasLink = company.link360 && company.link360 !== "N/A" && company.link360.trim() !== "";
-                        if (!hasLink) return false;
-
-                        const name = (company.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                        const kws = (company.keywords || []).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
-
-                        return name.includes(term) || kws.some(k => k.includes(term));
-                    });
-                    setSearchResults(filtered);
-                } else {
-                    setSearchResults([]);
-                }
-            };
 
             const handleLinkClick = (company) => {
                 if (company.link360 && company.link360 !== "N/A") {
@@ -726,62 +723,127 @@
                 }
             };
 
+            const getCorClasses = () => ({
+                border: 'border-purple-500/50',
+                bg: 'bg-purple-500/10',
+                text: 'text-purple-400',
+                hover: 'hover:border-purple-500/50 hover:bg-purple-500/5'
+            });
+
             if (!isOpen) return null;
 
-            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4" },
-                React.createElement("div", { className: "bg-black p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-900" },
-                    React.createElement("div", { className: "flex justify-between items-center mb-4" },
-                        React.createElement("div", { className: "flex items-center gap-2" },
-                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" }),
-                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 13a3 3 0 11-6 0 3 3 0 016 0z" })
-                            ),
-                            React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, "Links 360")
-                        ),
-                        React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
-                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
-                            )
-                        )
-                    ),
-                    React.createElement("div", { className: "mb-4" },
-                        React.createElement("input", {
-                            type: "text",
-                            className: "w-full pl-4 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all text-sm backdrop-blur-xl",
-                            placeholder: "Buscar cliente com fotos 360...",
-                            value: searchTerm,
-                            onChange: handleSearch,
-                            autoFocus: true
-                        })
-                    ),
-                    React.createElement("div", { className: "max-h-80 overflow-y-auto custom-scrollbar" },
-                        searchResults.length > 0 ? (
-                            searchResults.map((company) => (
-                                React.createElement("div", {
-                                    key: company.id,
-                                    onClick: () => handleLinkClick(company),
-                                    className: "hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-all flex justify-between items-center group border-b border-white/5 last:border-0"
-                                },
-                                    React.createElement("div", { className: "flex-1" },
-                                        React.createElement("p", { className: "font-semibold text-white group-hover:text-purple-400 transition-colors text-sm" }, company.name),
-                                        React.createElement("p", { className: "text-[10px] text-gray-500 mt-1 truncate" }, company.category)
-                                    ),
-                                    React.createElement("span", { className: "text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg" }, "→")
+            const cores = getCorClasses();
+
+            return React.createElement(React.Fragment, null,
+                React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4" },
+                    React.createElement("div", { className: "bg-black rounded-xl shadow-2xl w-full max-w-5xl h-[95vh] md:h-[90vh] border border-gray-900 flex flex-col" },
+                        // Header
+                        React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-900 bg-black rounded-t-xl" },
+                            React.createElement("div", { className: "flex items-center gap-3" },
+                                React.createElement("div", { className: "w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center" },
+                                    React.createElement("img", { 
+                                        src: "assets/icone-360-link.png", 
+                                        alt: "Links 360°",
+                                        className: "h-7 w-7 object-contain"
+                                    })
+                                ),
+                                React.createElement("div", null,
+                                    React.createElement("h3", { className: "text-lg font-semibold text-white" }, "Links 360"),
+                                    React.createElement("p", { className: "text-xs text-gray-400" }, `${links360.length} links disponíveis`)
                                 )
-                            ))
-                        ) : searchTerm.length > 0 ? (
-                            React.createElement("div", { className: "p-8 text-center text-mono text-gray-500" }, `Nenhum link 360 encontrado para: ${searchTerm}`)
-                        ) : (
-                            React.createElement("div", { className: "p-6 text-center text-gray-500 text-sm" },
-                                "Digite o nome do cliente para buscar fotos 360"
+                            ),
+                            React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                                )
+                            )
+                        ),
+                        // Barra de busca
+                        React.createElement("div", { className: "p-4 border-b border-gray-900 bg-black" },
+                            React.createElement("div", { className: "relative" },
+                                React.createElement("input", {
+                                    type: "text",
+                                    className: "w-full pl-10 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all text-sm backdrop-blur-xl",
+                                    placeholder: "Buscar cliente com fotos 360...",
+                                    value: searchTerm,
+                                    onChange: (e) => setSearchTerm(e.target.value),
+                                    autoFocus: true
+                                }),
+                                React.createElement("div", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" },
+                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" })
+                                    )
+                                )
+                            )
+                        ),
+                        // Lista de Links 360 em Cards
+                        React.createElement("div", { className: "flex-1 overflow-y-auto custom-scrollbar p-4" },
+                            itemsFiltrados.length > 0 ? (
+                                React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+                                    itemsFiltrados.map((item, index) => (
+                                        React.createElement("div", {
+                                            key: item.id || index,
+                                            onClick: () => handleLinkClick(item),
+                                            className: `bg-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer ${cores.hover} transition-all group`
+                                        },
+                                            React.createElement("div", { className: "flex items-start gap-3 p-3" },
+                                                // Thumbnail / Ícone Link 360
+                                                React.createElement("div", { className: "relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center" },
+                                                    React.createElement("img", { 
+                                                        src: "assets/icone-360-link.png", 
+                                                        alt: "360°",
+                                                        className: "w-14 h-14 object-contain"
+                                                    })
+                                                ),
+                                                // Info
+                                                React.createElement("div", { className: "flex-1 min-w-0" },
+                                                    React.createElement("h4", { className: "text-white font-semibold text-sm mb-1 group-hover:text-purple-400 transition-colors truncate" }, item.name),
+                                                    React.createElement("p", { className: "text-gray-400 text-xs line-clamp-2 mb-2" }, item.category || "Sem categoria"),
+                                                    // Tags/Keywords
+                                                    item.keywords && item.keywords.length > 0 && (
+                                                        React.createElement("div", { className: "flex flex-wrap gap-1" },
+                                                            item.keywords.slice(0, 3).map((kw, i) => (
+                                                                React.createElement("span", { key: i, className: "text-[10px] px-2 py-0.5 bg-white/5 rounded text-gray-500 truncate max-w-[80px]" }, kw)
+                                                            ))
+                                                        )
+                                                    ),
+                                                    // Ação
+                                                    React.createElement("div", { className: "mt-2 flex items-center gap-2" },
+                                                        React.createElement("span", { className: "text-xs text-purple-400 flex items-center gap-1" },
+                                                            React.createElement("span", null, "Abrir Link"),
+                                                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ))
+                                )
+                            ) : searchTerm.length > 0 ? (
+                                React.createElement("div", { className: "p-8 text-center" },
+                                    React.createElement("div", { className: "text-4xl mb-4" }, "🔍"),
+                                    React.createElement("p", { className: "text-gray-400" }, `Nenhum resultado encontrado para: "${searchTerm}"`),
+                                    React.createElement("p", { className: "text-gray-600 text-sm mt-2" }, "Tente buscar com outras palavras-chave")
+                                )
+                            ) : (
+                                React.createElement("div", { className: "p-8 text-center" },
+                                    React.createElement("div", { className: "text-4xl mb-4" }, "📷"),
+                                    React.createElement("p", { className: "text-gray-400" }, `${links360.length} links 360 disponíveis`),
+                                    React.createElement("p", { className: "text-gray-600 text-sm mt-2" }, "Use a busca acima para encontrar um cliente específico")
+                                )
+                            )
+                        ),
+                        // Footer
+                        React.createElement("div", { className: "p-4 border-t border-gray-900 bg-black rounded-b-xl" },
+                            React.createElement("div", { className: "flex justify-between items-center" },
+                                React.createElement("p", { className: "text-center text-gray-500 text-xs" },
+                                    `${itemsFiltrados.length} de ${links360.length} links 360`
+                                ),
+                                React.createElement("button", { onClick: onClose, className: "text-xs text-gray-400 hover:text-white transition-colors px-4 py-2 bg-white/5 rounded-lg" }, "Fechar")
                             )
                         )
-                    ),
-                    React.createElement("div", { className: "mt-4 pt-3 border-t border-white/10 flex justify-between items-center" },
-                        React.createElement("span", { className: "text-[10px] text-gray-500" },
-                            `${companiesData.filter(c => c.link360 && c.link360 !== "N/A" && c.link360.trim() !== "").length} links disponíveis`
-                        ),
-                        React.createElement("button", { onClick: onClose, className: "text-xs text-gray-400 hover:text-white transition-colors" }, "Fechar")
                     )
                 )
             );
@@ -1154,10 +1216,12 @@
                         React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-900 bg-black rounded-t-xl" },
                             React.createElement("div", { className: "flex items-center gap-3" },
                                 React.createElement("div", { className: "w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center" },
-                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-orange-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" }),
-                                        React.createElement("circle", { cx: "12", cy: "12", r: "3", strokeWidth: "1.5", stroke: "currentColor", fill: "none" })
-                                    )
+                                    React.createElement("img", { 
+                                        src: "assets/icone-tour-360.png", 
+                                        alt: "Tour 360°",
+                                        className: "h-7 w-7 object-contain",
+                                        style: { filter: 'brightness(0) invert(1)' }
+                                    })
                                 ),
                                 React.createElement("div", null,
                                     React.createElement("h3", { className: "text-lg font-semibold text-white" }, "Tour Virtual"),
@@ -1204,11 +1268,11 @@
                                             React.createElement("div", { className: "flex items-start gap-3 p-3" },
                                                 // Thumbnail / Ícone Tour 360°
                                                 React.createElement("div", { className: "relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center" },
-                                                    // Imagem do ícone Tour 360° (branca)
+                                                    // Imagem do ícone Tour 360° (branca e maior)
                                                     React.createElement("img", { 
-                                                        src: "assets/Design sem nome (1).png", 
+                                                        src: "assets/icone-tour-360.png", 
                                                         alt: "Tour 360°",
-                                                        className: "w-14 h-14 object-contain",
+                                                        className: "w-16 h-16 object-contain",
                                                         style: { filter: 'brightness(0) invert(1)' }
                                                     }),
                                                     // Badge de embeddable
@@ -1617,7 +1681,8 @@
                                 }
                             },
                                 React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Criações"),
-                                React.createElement("div", { className: "text-4xl font-bold text-white tracking-tighter" },
+                                React.createElement("div", { className: "text-4xl font-bold text-white tracking-tighter flex items-center gap-2" },
+                                    React.createElement("img", { src: "https://www.google.com/favicon.ico", alt: "Google", className: "h-6 w-6 opacity-50 grayscale" }),
                                     companiesData.filter(c => c.type?.toLowerCase().includes('cria')).length
                                 )
                             ),
@@ -1630,7 +1695,8 @@
                                 }
                             },
                                 React.createElement("div", { className: "text-[10px] text-gray-400 uppercase tracking-widest mb-1" }, "Atualizações"),
-                                React.createElement("div", { className: "text-4xl font-bold text-green-500 tracking-tighter" },
+                                React.createElement("div", { className: "text-4xl font-bold text-green-500 tracking-tighter flex items-center gap-2" },
+                                    React.createElement("img", { src: "https://www.google.com/favicon.ico", alt: "Google", className: "h-6 w-6" }),
                                     companiesData.filter(c => c.type?.toLowerCase().includes('atua')).length
                                 )
                             )
@@ -1665,9 +1731,11 @@
                             React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Sites Padrão"),
                             React.createElement("div", { className: "text-3xl font-bold text-blue-400 tracking-tighter" }, totalSitesPadrao)
                         ),
-                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-blue-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" })
-                        )
+                        React.createElement("img", { 
+                            src: "assets/icone-site-padrao.png", 
+                            alt: "Sites Padrão",
+                            className: "h-11 w-11 object-contain"
+                        })
                     ),
                     React.createElement("div", {
                         className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between cursor-pointer hover:border-cyan-500/40 hover:shadow-cyan-500/10 hover:shadow-lg transition-all",
@@ -1677,9 +1745,11 @@
                             React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Sites Person."),
                             React.createElement("div", { className: "text-3xl font-bold text-cyan-400 tracking-tighter" }, totalSitesPerson)
                         ),
-                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-cyan-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" })
-                        )
+                        React.createElement("img", { 
+                            src: "assets/icone-site-personalizado.png", 
+                            alt: "Sites Personalizados",
+                            className: "h-10 w-10 object-contain"
+                        })
                     ),
                     React.createElement("div", {
                         className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between cursor-pointer hover:border-purple-500/40 hover:shadow-purple-500/10 hover:shadow-lg transition-all",
@@ -1689,11 +1759,12 @@
                             React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Links 360"),
                             React.createElement("div", { className: "text-3xl font-bold text-purple-400 tracking-tighter" }, total360)
                         ),
-                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                            React.createElement("rect", { x: "2", y: "2", width: "20", height: "20", rx: "5", ry: "5", strokeWidth: "1.5" }),
-                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" }),
-                            React.createElement("line", { x1: "17.5", y1: "6.5", x2: "17.51", y2: "6.5", strokeWidth: "1.5" })
-                        )
+                        React.createElement("img", { 
+                            src: "assets/icone-360-link.png", 
+                            alt: "Links 360°",
+                            className: "h-10 w-10 object-contain",
+                            
+                        })
                     ),
                     React.createElement("div", {
                         className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between cursor-pointer hover:border-orange-500/40 hover:shadow-orange-500/10 hover:shadow-lg transition-all",
@@ -1703,10 +1774,12 @@
                             React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Tour Virtual"),
                             React.createElement("div", { className: "text-3xl font-bold text-orange-400 tracking-tighter" }, totalTour)
                         ),
-                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-orange-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" }),
-                            React.createElement("circle", { cx: "12", cy: "12", r: "3", strokeWidth: "1.5", stroke: "currentColor", fill: "none" })
-                        )
+                        React.createElement("img", { 
+                            src: "assets/icone-tour-360.png", 
+                            alt: "Tour 360°",
+                            className: "h-10 w-10 object-contain",
+                            style: { filter: 'brightness(0) invert(1)' }
+                        })
                     )
                 ),
 
@@ -1722,7 +1795,7 @@
                         React.createElement(DarkButton, {
                             onClick: () => setShowLinksAG5Modal(true),
                             className: "h-32",
-                            icon: React.createElement("img", { src: "assets/Logo- AG5 - Oficial (14).png", className: "h-8 w-8 object-contain", alt: "AG5" })
+                            icon: React.createElement("img", { src: "assets/Logo- AG5 - Oficial (14).png", className: "h-10 w-10 object-contain", alt: "AG5" })
                         }, "Links AG5"),
                         React.createElement(DarkButton, {
                             onClick: () => setCurrentPage('client-results'),
