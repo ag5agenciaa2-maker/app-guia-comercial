@@ -757,6 +757,7 @@
         // Modal de Repositório de Links 360 (estilo Tour Virtual)
         const Links360SearchModal = ({ isOpen, onClose, companiesData }) => {
             const [searchTerm, setSearchTerm] = useState('');
+            const [previewCompany, setPreviewCompany] = useState(null);
 
             // Apenas empresas com Link 360
             const links360 = useMemo(() => {
@@ -780,12 +781,13 @@
             useEffect(() => {
                 if (!isOpen) {
                     setSearchTerm('');
+                    setPreviewCompany(null);
                 }
             }, [isOpen]);
 
             const handleLinkClick = (company) => {
                 if (company.link360 && company.link360 !== "N/A") {
-                    window.open(company.link360, '_blank');
+                    setPreviewCompany(company);
                 }
             };
 
@@ -955,7 +957,12 @@
                             )
                         )
                     )
-                )
+                ),
+                React.createElement(Link360PreviewModal, {
+                    isOpen: !!previewCompany,
+                    onClose: () => setPreviewCompany(null),
+                    company: previewCompany
+                })
             );
         };
 
@@ -1628,26 +1635,22 @@
                                         className: `bg-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer ${cores.hover} transition-all group`
                                     },
                                         React.createElement("div", { className: "p-4" },
-                                            // Header do card
-                                            React.createElement("div", { className: "flex items-start justify-between mb-2" },
-                                                React.createElement("div", { className: "flex items-center gap-2" },
-                                                    // Badge de tipo (apenas borda, sem fundo)
-                                                    React.createElement("span", {
-                                                        className: `text-[10px] px-2 py-0.5 rounded-full border ${isCriacao ? 'border-cyan-500/50 text-cyan-400' :
-                                                                isAtualizacao ? 'border-green-500/50 text-green-400' :
-                                                                    'border-gray-500/50 text-gray-400'
-                                                            }`
-                                                    },
-                                                        empresa.type || "Geral"
-                                                    )
-                                                ),
-                                                React.createElement("span", { className: "text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" }, "→")
-                                            ),
-                                            // Nome da empresa
+                                            // Nome da empresa (em cima)
                                             React.createElement("h4", { className: "text-white font-semibold text-sm mb-1 group-hover:text-green-400 transition-colors" },
                                                 empresa.name
                                             ),
-                                            // Categoria
+                                            // Tipo: Criação ou Atualização (abaixo do nome)
+                                            React.createElement("div", { className: "mb-2" },
+                                                React.createElement("span", {
+                                                    className: `text-[10px] px-2 py-0.5 rounded-full border ${isCriacao ? 'border-cyan-500/50 text-cyan-400' :
+                                                            isAtualizacao ? 'border-green-500/50 text-green-400' :
+                                                                'border-gray-500/50 text-gray-400'
+                                                        }`
+                                                },
+                                                    isCriacao ? 'Criação' : isAtualizacao ? 'Atualização' : (empresa.type || "Geral")
+                                                )
+                                            ),
+                                            // Categoria (embaixo)
                                             React.createElement("p", { className: "text-gray-400 text-xs mb-2" },
                                                 empresa.category || "Sem categoria"
                                             ),
