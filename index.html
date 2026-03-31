@@ -21,14 +21,14 @@
         :root {
             --accent: #22c55e;
             --accent-glow: rgba(34, 197, 94, 0.3);
-            --bg: #050505;
-            --surface: rgba(20, 20, 20, 0.6);
-            --border: rgba(255, 255, 255, 0.06);
+            --bg: #000000;
+            --surface: rgba(10, 10, 10, 0.8);
+            --border: rgba(255, 255, 255, 0.08);
         }
 
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: var(--bg);
+            background-color: #000000;
             color: #ffffff;
             margin: 0;
             overflow-x: hidden;
@@ -36,19 +36,7 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Efeito de Ruído Premium */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='n'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.65' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23n)'/%3e%3c/svg%3e");
-            opacity: 0.04;
-            pointer-events: none;
-            z-index: 500;
-        }
+        /* Fundo limpo - sem efeitos de textura */
 
         .mesh-bg {
             position: fixed;
@@ -56,18 +44,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background:
-                radial-gradient(circle at 10% 10%, rgba(34, 197, 94, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 90%, rgba(20, 80, 40, 0.05) 0%, transparent 40%);
+            background: #000000;
             z-index: -1;
         }
 
         .glass-panel {
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
         }
 
         .premium-border {
@@ -185,7 +169,7 @@
         const Modal = ({ isOpen, onClose, title, children }) => {
             if (!isOpen) return null;
             return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] p-4" },
-                React.createElement("div", { className: "bg-[#2c2c2c] p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-md border border-gray-700" },
+                React.createElement("div", { className: "bg-black p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-md border border-gray-900" },
                     React.createElement("div", { className: "flex justify-between items-center mb-4" },
                         React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, title || "Aviso"),
                         React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
@@ -220,9 +204,9 @@
             };
 
             return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[300] p-2 md:p-4" },
-                React.createElement("div", { className: "bg-[#1a1a1a] rounded-xl shadow-2xl h-[95vh] md:h-[90vh] border border-gray-700 flex flex-col" },
+                React.createElement("div", { className: "bg-black rounded-xl shadow-2xl h-[95vh] md:h-[90vh] border border-gray-900 flex flex-col" },
                     // Header
-                    React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-700 bg-[#252525] rounded-t-xl" },
+                    React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-900 bg-black rounded-t-xl" },
                         React.createElement("div", { className: "flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2" },
                             React.createElement("div", { className: "w-8 h-8 md:w-10 md:h-10 rounded-lg bg-pink-500/20 flex items-center justify-center flex-shrink-0" },
                                 React.createElement("span", { className: "text-lg md:text-xl" }, "🎬")
@@ -329,9 +313,9 @@
 
             return React.createElement(React.Fragment, null,
                 React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4" },
-                    React.createElement("div", { className: "bg-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-5xl h-[95vh] md:h-[90vh] border border-gray-700 flex flex-col" },
+                    React.createElement("div", { className: "bg-black rounded-xl shadow-2xl w-full max-w-5xl h-[95vh] md:h-[90vh] border border-gray-900 flex flex-col" },
                         // Header
-                        React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-700 bg-[#252525] rounded-t-xl" },
+                        React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-900 bg-black rounded-t-xl" },
                             React.createElement("div", { className: "flex items-center gap-3" },
                                 React.createElement("div", { className: "w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center" },
                                     React.createElement("span", { className: "text-xl" }, "🎬")
@@ -348,7 +332,7 @@
                             )
                         ),
                         // Abas de Categoria
-                        React.createElement("div", { className: "flex border-b border-gray-700 overflow-x-auto" },
+                        React.createElement("div", { className: "flex border-b border-gray-900 overflow-x-auto" },
                             Object.keys(categorias).map((key) => (
                                 React.createElement("button", {
                                     key: key,
@@ -371,7 +355,7 @@
                                     React.createElement("div", {
                                         key: index,
                                         onClick: () => abrirVideo(video),
-                                        className: "bg-[#252525] border border-gray-700 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 hover:bg-[#2a2a2a] transition-all group"
+                                        className: "bg-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer hover:border-pink-500/50 hover:bg-black transition-all group"
                                     },
                                         // Thumbnail ou ícone de play
                                         video.thumbnail ? (
@@ -420,7 +404,7 @@
                             )
                         ),
                         // Footer
-                        React.createElement("div", { className: "p-4 border-t border-gray-700 bg-[#252525] rounded-b-xl" },
+                        React.createElement("div", { className: "p-4 border-t border-gray-900 bg-black rounded-b-xl" },
                             React.createElement("p", { className: "text-center text-gray-500 text-xs" }, 
                                 `${categorias[categoriaAtiva].videos.length} vídeos disponíveis em ${categorias[categoriaAtiva].titulo}`
                             )
@@ -437,6 +421,17 @@
         };
 
         // Modal de Preview do Site
+        // Função auxiliar para verificar se um link é incorporável
+        const isEmbeddable = (url) => {
+            if (!url || url === "N/A") return false;
+            // Links que geralmente bloqueiam iframe
+            if (url.includes('google.com/maps') && !url.includes('embed')) return false;
+            if (url.includes('share.google')) return false;
+            if (url.includes('maps.app.goo.gl')) return false;
+            if (url.includes('g.co/kgs')) return false;
+            return true;
+        };
+
         const SitePreviewModal = ({ isOpen, onClose, company }) => {
             if (!isOpen || !company) return null;
 
@@ -444,56 +439,61 @@
                 window.open(company.linkSiteSEO, '_blank');
             };
 
-            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4" },
-                React.createElement("div", { className: "bg-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-6xl h-[95vh] md:h-[90vh] border border-gray-700 flex flex-col" },
+            const canEmbed = isEmbeddable(company.linkSiteSEO);
+
+            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4 animate-fade-in" },
+                React.createElement("div", { className: "bg-black rounded-xl shadow-2xl w-full max-w-6xl h-[95vh] md:h-[90vh] border border-gray-900 flex flex-col overflow-hidden" },
                     // Header
-                    React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-700 bg-[#252525] rounded-t-xl" },
+                    React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-900 bg-black" },
                         React.createElement("div", { className: "flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2" },
                             React.createElement("div", { className: "w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0" },
                                 React.createElement("span", { className: "text-lg md:text-xl" }, "🌐")
                             ),
                             React.createElement("div", { className: "min-w-0 flex-1" },
                                 React.createElement("h3", { className: "text-sm md:text-lg font-semibold text-white truncate" }, company.name),
-                                React.createElement("p", { className: "text-[10px] md:text-xs text-gray-400 truncate" }, company.linkSiteSEO),
-                                // Botão mobile - abaixo do link
-                                React.createElement("button", { 
-                                    onClick: handleOpenExternal,
-                                    className: "md:hidden mt-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors flex items-center gap-1.5 w-fit"
-                                },
-                                    React.createElement("span", null, "Abrir em Nova Aba"),
-                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
-                                    )
-                                )
+                                React.createElement("p", { className: "text-[10px] md:text-xs text-gray-400 truncate opacity-60" }, company.linkSiteSEO)
                             )
                         ),
-                        // Apenas o X no canto superior direito
                         React.createElement("div", { className: "flex items-center gap-2 flex-shrink-0" },
-                            // Botão desktop - ao lado do X
                             React.createElement("button", { 
                                 onClick: handleOpenExternal,
-                                className: "hidden md:flex px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors items-center gap-2"
+                                className: "px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs md:text-sm rounded-lg transition-all flex items-center gap-2 font-bold shadow-lg"
                             },
-                                React.createElement("span", null, "Abrir em Nova Aba"),
+                                React.createElement("span", null, "Visualização Externa"),
                                 React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                     React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
                                 )
                             ),
-                            React.createElement("button", { onClick: onClose, className: "p-1.5 md:p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                            React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
                                 React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                     React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
                                 )
                             )
                         )
                     ),
-                    // Iframe
-                    React.createElement("div", { className: "flex-1 relative bg-white" },
-                        React.createElement("iframe", {
-                            src: company.linkSiteSEO,
-                            className: "w-full h-full border-0",
-                            sandbox: "allow-scripts allow-same-origin allow-forms allow-popups",
-                            title: `Preview - ${company.name}`
-                        })
+                    // Iframe ou Fallback
+                    React.createElement("div", { className: "flex-1 relative bg-white overflow-hidden" },
+                        canEmbed ? (
+                            React.createElement("iframe", {
+                                src: company.linkSiteSEO,
+                                className: "w-full h-full border-0",
+                                allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; xr-spatial-tracking",
+                                sandbox: "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation",
+                                title: `Preview - ${company.name}`
+                            })
+                        ) : (
+                            React.createElement("div", { className: "w-full h-full bg-black flex flex-col items-center justify-center p-8 text-center" },
+                                React.createElement("div", { className: "w-20 h-20 mb-6 rounded-2xl bg-green-500/10 flex items-center justify-center animate-bounce" }, 
+                                    React.createElement("span", { className: "text-4xl" }, "🌐")
+                                ),
+                                React.createElement("h3", { className: "text-2xl font-bold text-white mb-3" }, "Segurança do Google"),
+                                React.createElement("p", { className: "text-gray-400 max-w-sm mb-10 leading-relaxed text-sm md:text-base" }, "O Google protege este link contra incorporação direta. Para visualizar o site com todas as funções ativas, clique no botão abaixo."),
+                                React.createElement("button", { 
+                                    onClick: handleOpenExternal,
+                                    className: "px-10 py-5 bg-green-600 hover:bg-green-700 text-white font-black rounded-2xl shadow-[0_10px_40px_rgba(22,163,74,0.3)] transition-all transform hover:scale-105 active:scale-95 uppercase tracking-tighter"
+                                }, "Abrir Site Agora ↗")
+                            )
+                        )
                     )
                 )
             );
@@ -548,7 +548,7 @@
 
             return React.createElement(React.Fragment, null,
                 React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4" },
-                    React.createElement("div", { className: "bg-[#2c2c2c] p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-700" },
+                    React.createElement("div", { className: "bg-black p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-900" },
                         React.createElement("div", { className: "flex justify-between items-center mb-4" },
                             React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, "🌐 Sites Personalizados"),
                             React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
@@ -614,54 +614,76 @@
                 window.open(company.link360, '_blank');
             };
 
-            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4" },
-                React.createElement("div", { className: "bg-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-6xl h-[95vh] md:h-[90vh] border border-gray-700 flex flex-col" },
+            const canEmbed = isEmbeddable(company.link360);
+
+            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4 animate-fade-in" },
+                React.createElement("div", { className: "bg-black rounded-xl shadow-2xl w-full max-w-6xl h-[95vh] md:h-[90vh] border border-gray-900 flex flex-col overflow-hidden" },
                     // Header
-                    React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-700 bg-[#252525] rounded-t-xl" },
+                    React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-900 bg-black" },
                         React.createElement("div", { className: "flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2" },
                             React.createElement("div", { className: "w-8 h-8 md:w-10 md:h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0" },
-                                React.createElement("span", { className: "text-lg md:text-xl" }, "📷")
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" }),
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 13a3 3 0 11-6 0 3 3 0 016 0z" })
+                                )
                             ),
                             React.createElement("div", { className: "min-w-0 flex-1" },
                                 React.createElement("h3", { className: "text-sm md:text-lg font-semibold text-white truncate" }, company.name),
-                                React.createElement("p", { className: "text-[10px] md:text-xs text-gray-400 truncate" }, company.link360),
-                                // Botão mobile
-                                React.createElement("button", { 
-                                    onClick: handleOpenExternal,
-                                    className: "md:hidden mt-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors flex items-center gap-1.5 w-fit"
-                                },
-                                    React.createElement("span", null, "Abrir em Nova Aba"),
-                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
-                                    )
-                                )
+                                React.createElement("p", { className: "text-[10px] md:text-xs text-gray-400 truncate opacity-60" }, company.link360)
                             )
                         ),
                         React.createElement("div", { className: "flex items-center gap-2 flex-shrink-0" },
-                            // Botão desktop
+                            // Botão Instagram
+                            React.createElement("button", { 
+                                onClick: () => window.open(`https://www.instagram.com/${company.name.replace(/\s+/g, '').toLowerCase()}`, '_blank'),
+                                className: "hidden md:flex px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-xs rounded-lg transition-all items-center gap-2"
+                            },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("rect", { x: "2", y: "2", width: "20", height: "20", rx: "5", ry: "5", strokeWidth: "2" }),
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" }),
+                                    React.createElement("line", { x1: "17.5", y1: "6.5", x2: "17.51", y2: "6.5", strokeWidth: "2" })
+                                ),
+                                React.createElement("span", null, "Instagram")
+                            ),
                             React.createElement("button", { 
                                 onClick: handleOpenExternal,
-                                className: "hidden md:flex px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors items-center gap-2"
+                                className: "px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs md:text-sm rounded-lg transition-all flex items-center gap-2 font-bold shadow-lg"
                             },
-                                React.createElement("span", null, "Abrir em Nova Aba"),
+                                React.createElement("span", null, "Visualização Imersiva"),
                                 React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                     React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
                                 )
                             ),
-                            React.createElement("button", { onClick: onClose, className: "p-1.5 md:p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                            React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
                                 React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                     React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
                                 )
                             )
                         )
                     ),
-                    React.createElement("div", { className: "flex-1 relative bg-white" },
-                        React.createElement("iframe", {
-                            src: company.link360,
-                            className: "w-full h-full border-0",
-                            sandbox: "allow-scripts allow-same-origin allow-forms allow-popups",
-                            title: `360 Preview - ${company.name}`
-                        })
+                    // Iframe ou Fallback
+                    React.createElement("div", { className: "flex-1 relative bg-white overflow-hidden text-[#111]" },
+                        canEmbed ? (
+                            React.createElement("iframe", {
+                                src: company.link360,
+                                className: "w-full h-full border-0",
+                                allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; xr-spatial-tracking",
+                                sandbox: "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation",
+                                title: `360 Preview - ${company.name}`
+                            })
+                        ) : (
+                            React.createElement("div", { className: "w-full h-full bg-black flex flex-col items-center justify-center p-8 text-center" },
+                                React.createElement("div", { className: "w-20 h-20 mb-6 rounded-2xl bg-purple-500/10 flex items-center justify-center animate-pulse" }, 
+                                    React.createElement("span", { className: "text-4xl" }, "📍")
+                                ),
+                                React.createElement("h3", { className: "text-2xl font-bold text-white mb-3" }, "Link Externo Google"),
+                                React.createElement("p", { className: "text-gray-400 max-w-sm mb-10 leading-relaxed text-sm md:text-base" }, "O Google Street View requer abertura em sua plataforma oficial para navegação imersiva 360º."),
+                                React.createElement("button", { 
+                                    onClick: handleOpenExternal,
+                                    className: "px-10 py-5 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-[0_10px_40px_rgba(147,51,234,0.3)] transition-all transform hover:scale-105 active:scale-95 uppercase tracking-tighter"
+                                }, "Explorar em 360º ↗")
+                            )
+                        )
                     )
                 )
             );
@@ -715,9 +737,15 @@
 
             return React.createElement(React.Fragment, null,
                 React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4" },
-                    React.createElement("div", { className: "bg-[#2c2c2c] p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-700" },
+                    React.createElement("div", { className: "bg-black p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-900" },
                         React.createElement("div", { className: "flex justify-between items-center mb-4" },
-                            React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, "📷 Links 360"),
+                            React.createElement("div", { className: "flex items-center gap-2" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" }),
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 13a3 3 0 11-6 0 3 3 0 016 0z" })
+                                ),
+                                React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, "Links 360")
+                            ),
                             React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
                                 React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                     React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
@@ -774,177 +802,736 @@
         };
 
         // Modal de Preview de Tour Virtual
-        const TourPreviewModal = ({ isOpen, onClose, company }) => {
-            if (!isOpen || !company) return null;
+        const TourVirtualPreviewModal = ({ isOpen, onClose, item }) => {
+            if (!isOpen || !item) return null;
 
             const handleOpenExternal = () => {
-                window.open(company.linkTour, '_blank');
+                // Abre o embed do tour (iframe)
+                window.open(item.linkTour, '_blank');
             };
 
-            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4" },
-                React.createElement("div", { className: "bg-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-6xl h-[95vh] md:h-[90vh] border border-gray-700 flex flex-col" },
+            const handleOpenGoogleMaps = () => {
+                // Abre o link da coluna M "Tuor Virtual / Foto 360" (link do Google Maps)
+                // Este é o link que vai para o perfil do Google Maps (share.google ou maps.google)
+                if (item.linkTourOriginal && item.linkTourOriginal !== "N/A") {
+                    window.open(item.linkTourOriginal, '_blank');
+                } else if (item.linkTour && item.linkTour !== "N/A") {
+                    // Fallback: tenta converter embed em link normal
+                    const normalUrl = item.linkTour.replace('/embed?', '/?');
+                    window.open(normalUrl, '_blank');
+                } else {
+                    // Último fallback: busca no Google
+                    const searchQuery = `${item.name} ${item.category || ''}`;
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
+                }
+            };
+
+            const url = item.linkTour;
+            const canEmbed = isEmbeddable(url);
+            const titulo = 'Tour Virtual';
+            const cor = 'orange';
+
+            const getColorClass = (color) => ({
+                orange: { bg: 'bg-orange-500/20', btn: 'bg-orange-600 hover:bg-orange-700', shadow: 'shadow-[0_10px_40px_rgba(234,88,12,0.3)]', text: 'text-orange-400' }
+            })[color];
+
+            const colors = getColorClass(cor);
+
+            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[300] p-2 md:p-4 animate-fade-in" },
+                React.createElement("div", { className: "bg-black rounded-xl shadow-2xl w-full max-w-6xl h-[95vh] md:h-[90vh] border border-gray-900 flex flex-col overflow-hidden" },
                     // Header
-                    React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-700 bg-[#252525] rounded-t-xl" },
+                    React.createElement("div", { className: "flex justify-between items-start p-3 md:p-4 border-b border-gray-900 bg-black" },
                         React.createElement("div", { className: "flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2" },
-                            React.createElement("div", { className: "w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0" },
-                                React.createElement("span", { className: "text-lg md:text-xl" }, "🎯")
+                            React.createElement("div", { className: `w-8 h-8 md:w-10 md:h-10 rounded-lg ${colors.bg} flex items-center justify-center flex-shrink-0` },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 text-orange-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" }),
+                                    React.createElement("circle", { cx: "12", cy: "12", r: "3", strokeWidth: "1.5", stroke: "currentColor", fill: "none" })
+                                )
                             ),
                             React.createElement("div", { className: "min-w-0 flex-1" },
-                                React.createElement("h3", { className: "text-sm md:text-lg font-semibold text-white truncate" }, company.name),
-                                React.createElement("p", { className: "text-[10px] md:text-xs text-gray-400 truncate" }, company.linkTour),
-                                // Botão mobile
-                                React.createElement("button", { 
-                                    onClick: handleOpenExternal,
-                                    className: "md:hidden mt-2 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors flex items-center gap-1.5 w-fit"
-                                },
-                                    React.createElement("span", null, "Abrir em Nova Aba"),
-                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
-                                    )
-                                )
+                                React.createElement("h3", { className: "text-sm md:text-lg font-semibold text-white truncate" }, item.name),
+                                React.createElement("p", { className: `text-[10px] md:text-xs ${colors.text} truncate` }, titulo)
                             )
                         ),
                         React.createElement("div", { className: "flex items-center gap-2 flex-shrink-0" },
-                            // Botão desktop
+                            // Botão Ver no Google Maps
+                            React.createElement("button", { 
+                                onClick: handleOpenGoogleMaps,
+                                className: "hidden md:flex px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-all items-center gap-2"
+                            },
+                                React.createElement("span", null, "Ver no Google"),
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
+                                )
+                            ),
+                            // Botão Abrir em Nova Aba
                             React.createElement("button", { 
                                 onClick: handleOpenExternal,
-                                className: "hidden md:flex px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-lg transition-colors items-center gap-2"
+                                className: `px-4 py-2 ${colors.btn} text-white text-xs md:text-sm rounded-lg transition-all flex items-center gap-2 font-bold shadow-lg`
                             },
                                 React.createElement("span", null, "Abrir em Nova Aba"),
                                 React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                     React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
                                 )
                             ),
-                            React.createElement("button", { onClick: onClose, className: "p-1.5 md:p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                            React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
                                 React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                     React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
                                 )
                             )
                         )
                     ),
-                    React.createElement("div", { className: "flex-1 relative bg-white" },
+                    // Iframe do Tour Virtual
+                    React.createElement("div", { className: "flex-1 relative bg-black overflow-hidden" },
                         React.createElement("iframe", {
-                            src: company.linkTour,
+                            src: url,
                             className: "w-full h-full border-0",
-                            sandbox: "allow-scripts allow-same-origin allow-forms allow-popups",
-                            title: `Tour Preview - ${company.name}`
+                            allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; xr-spatial-tracking",
+                            sandbox: "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox",
+                            title: `${titulo} - ${item.name}`,
+                            loading: "lazy",
+                            referrerPolicy: "no-referrer-when-downgrade"
                         })
                     )
                 )
             );
         };
 
-        // Modal de busca para Fotos 360 e Tour Virtual
-        const TourSearchModal = ({ isOpen, onClose, companiesData }) => {
-            const [searchTerm, setSearchTerm] = useState('');
-            const [searchResults, setSearchResults] = useState([]);
-            const [previewCompany, setPreviewCompany] = useState(null);
+        // Tours Virtuais e Fotos 360 manuais - APENAS para empresas que NÃO estão na planilha
+        // Formato: { id: 'identificador-unico', embedUrl: 'URL_DO_IFRAME' }
+        // O sistema vai mesclar automaticamente com os dados da planilha
+        const TOURS_EMBED_MANUAIS = {
+            // Exemplo: 'nome-da-empresa': 'https://www.google.com/maps/embed?pb=...'
+            // Quando a empresa existe na planilha, o embedUrl será mesclado com os dados da planilha
+        };
 
-            useEffect(() => {
-                if (!isOpen) {
-                    setSearchTerm('');
-                    setSearchResults([]);
-                    setPreviewCompany(null);
+        const FOTOS_360_EMBED_MANUAIS = {
+            // Mesma lógica para fotos 360
+        };
+
+        // Função para extrair URL do iframe do Google Maps
+        const extrairEmbedUrlDoIframe = (iframeHtml) => {
+            if (!iframeHtml) return null;
+            const match = iframeHtml.match(/src=["']([^"']+)["']/);
+            return match ? match[1] : null;
+        };
+
+        // Função para adicionar/atualizar embed manual por nome da empresa
+        // Use esta função quando receber um novo iframe
+        const adicionarEmbedManual = (nomeEmpresa, iframeHtml, tipo = 'tour') => {
+            const embedUrl = extrairEmbedUrlDoIframe(iframeHtml);
+            if (!embedUrl) {
+                console.error('Não foi possível extrair URL do iframe');
+                return false;
+            }
+            
+            const nameKey = nomeEmpresa.toLowerCase().trim();
+            
+            if (tipo === 'tour') {
+                TOURS_EMBED_MANUAIS[nameKey] = embedUrl;
+            } else {
+                FOTOS_360_EMBED_MANUAIS[nameKey] = embedUrl;
+            }
+            
+            console.log(`Embed ${tipo} adicionado para: ${nomeEmpresa}`);
+            return true;
+        };
+
+        // Adicionar o tour da Borboleta Chic (exemplo de uso)
+        // Quando receber um novo iframe, use: adicionarEmbedManual('Nome da Empresa', iframeHtml, 'tour')
+        adicionarEmbedManual('Borboleta Chic', '<iframe src="https://www.google.com/maps/embed?pb=!4v1774963071415!6m8!1m7!1sCAoSHENJQUJJaERBLUpEQnBYMWtxOHpzVG8wMWhpOHY.!2m2!1d-22.89744362054879!2d-43.5493347991543!3f350.49!4f-19.480000000000004!5f0.7820865974627469" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>', 'tour');
+
+        // Função para mesclar embeds manuais com dados da planilha
+        const mesclarEmbedsManuais = (companiesData) => {
+            return companiesData.map(company => {
+                const nameKey = (company.name || '').toLowerCase().trim();
+                const mesclado = { ...company };
+                
+                // Verifica se existe embed manual para tour virtual
+                // O embed manual substitui o linkTour (para o preview no site)
+                // mas mantém linkTourOriginal (link da coluna M para "Ver no Google")
+                if (TOURS_EMBED_MANUAIS[nameKey]) {
+                    mesclado.linkTour = TOURS_EMBED_MANUAIS[nameKey]; // Embed para preview
+                    // linkTourOriginal permanece com o valor da planilha (coluna M)
                 }
-            }, [isOpen]);
-
-            const handleSearch = (e) => {
-                const term = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-                setSearchTerm(e.target.value);
-
-                if (term.length > 0) {
-                    const filtered = companiesData.filter(company => {
-                        const hasLink = company.linkTour && company.linkTour !== "N/A" && company.linkTour.trim() !== "";
-                        if (!hasLink) return false;
-
-                        const name = (company.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                        const kws = (company.keywords || []).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
-
-                        return name.includes(term) || kws.some(k => k.includes(term));
-                    });
-                    setSearchResults(filtered);
-                } else {
-                    setSearchResults([]);
+                
+                // Verifica se existe embed manual para foto 360
+                if (FOTOS_360_EMBED_MANUAIS[nameKey]) {
+                    mesclado.link360 = FOTOS_360_EMBED_MANUAIS[nameKey];
                 }
+                
+                return mesclado;
+            });
+        };
+
+        // Modal de Links AG5
+        const LinksAG5Modal = ({ isOpen, onClose, showAlertModal }) => {
+            const [copiedLink, setCopiedLink] = useState(null);
+
+            const copyToClipboard = (text, type) => {
+                navigator.clipboard.writeText(text).then(() => {
+                    setCopiedLink(type);
+                    setTimeout(() => setCopiedLink(null), 2000);
+                });
             };
 
-            const handleLinkClick = (company) => {
-                if (company.linkTour && company.linkTour !== "N/A") {
-                    setPreviewCompany(company);
-                }
-            };
-
-            const closePreview = () => {
-                setPreviewCompany(null);
+            const links = {
+                site: 'https://www.ag5agencia.com.br/',
+                perfil: 'https://share.google/xNA9qoaclX7x6GQKR',
+                avaliacao: 'https://g.page/r/CcPBmggG8mucEBM/review',
+                instagram: 'https://www.instagram.com/ag5agencia?igsh=d3B2MXhzc2x6azBh'
             };
 
             if (!isOpen) return null;
 
+            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-[200] p-4" },
+                React.createElement("div", { className: "bg-black rounded-xl shadow-2xl w-full max-w-md border border-gray-900 flex flex-col" },
+                    // Header
+                    React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-900" },
+                        React.createElement("div", { className: "flex items-center gap-3" },
+                            React.createElement("img", { 
+                                src: "assets/Logo- AG5 - Oficial (14).png", 
+                                className: "w-10 h-10 object-contain",
+                                alt: "AG5 Logo"
+                            }),
+                            React.createElement("div", null,
+                                React.createElement("h3", { className: "text-lg font-semibold text-white" }, "Links AG5"),
+                                React.createElement("p", { className: "text-xs text-gray-400" }, "Acesse nossos canais")
+                            )
+                        ),
+                        React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                            )
+                        )
+                    ),
+                    // Conteúdo
+                    React.createElement("div", { className: "p-4 space-y-3" },
+                        // Botão Site
+                        React.createElement("button", {
+                            onClick: () => window.open(links.site, '_blank'),
+                            className: "w-full p-3 bg-black border border-gray-800 hover:border-green-500/50 rounded-lg flex items-center gap-3 transition-all group"
+                        },
+                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 text-green-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" })
+                            ),
+                            React.createElement("span", { className: "text-white group-hover:text-green-400 transition-colors" }, "Site AG5")
+                        ),
+                        // Botão Perfil Google
+                        React.createElement("button", {
+                            onClick: () => window.open(links.perfil, '_blank'),
+                            className: "w-full p-3 bg-black border border-gray-800 hover:border-blue-500/50 rounded-lg flex items-center gap-3 transition-all group"
+                        },
+                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 text-blue-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" }),
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 11a3 3 0 11-6 0 3 3 0 016 0z" })
+                            ),
+                            React.createElement("span", { className: "text-white group-hover:text-blue-400 transition-colors" }, "Perfil Google")
+                        ),
+                        // Botão Link 360 (Em construção)
+                        React.createElement("button", {
+                            onClick: () => showAlertModal('Em Construção', 'Link 360 da AG5 em breve!'),
+                            className: "w-full p-3 bg-black border border-gray-800 hover:border-purple-500/50 rounded-lg flex items-center gap-3 transition-all group"
+                        },
+                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" }),
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 13a3 3 0 11-6 0 3 3 0 016 0z" })
+                            ),
+                            React.createElement("div", { className: "flex items-center gap-2" },
+                                React.createElement("span", { className: "text-white group-hover:text-purple-400 transition-colors" }, "Link 360"),
+                                React.createElement("span", { className: "text-[10px] px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded" }, "Em breve")
+                            )
+                        ),
+                        // Campo Link Avaliação
+                        React.createElement("div", { className: "p-3 bg-black border border-gray-800 rounded-lg" },
+                            React.createElement("label", { className: "text-xs text-gray-500 block mb-2" }, "Link para Avaliação"),
+                            React.createElement("div", { className: "flex gap-2" },
+                                React.createElement("input", {
+                                    type: "text",
+                                    readOnly: true,
+                                    value: links.avaliacao,
+                                    className: "flex-1 bg-black/50 border border-gray-800 rounded px-3 py-2 text-xs text-gray-400 truncate"
+                                }),
+                                React.createElement("button", {
+                                    onClick: () => copyToClipboard(links.avaliacao, 'avaliacao'),
+                                    className: "px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center gap-1"
+                                },
+                                    copiedLink === 'avaliacao' ? React.createElement("span", { className: "text-xs text-white" }, "Copiado!") : React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4 text-white", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" })
+                                    )
+                                )
+                            )
+                        ),
+                        // Campo Link Instagram
+                        React.createElement("div", { className: "p-3 bg-black border border-gray-800 rounded-lg" },
+                            React.createElement("label", { className: "text-xs text-gray-500 block mb-2" }, "Instagram AG5"),
+                            React.createElement("div", { className: "flex gap-2" },
+                                React.createElement("input", {
+                                    type: "text",
+                                    readOnly: true,
+                                    value: links.instagram,
+                                    className: "flex-1 bg-black/50 border border-gray-800 rounded px-3 py-2 text-xs text-gray-400 truncate"
+                                }),
+                                React.createElement("button", {
+                                    onClick: () => copyToClipboard(links.instagram, 'instagram'),
+                                    className: "px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg transition-colors flex items-center gap-1"
+                                },
+                                    copiedLink === 'instagram' ? React.createElement("span", { className: "text-xs text-white" }, "Copiado!") : React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-4 w-4 text-white", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" })
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    // Footer
+                    React.createElement("div", { className: "p-4 border-t border-gray-900" },
+                        React.createElement("p", { className: "text-center text-xs text-gray-500" }, "© 2024 AG5 Agency")
+                    )
+                )
+            );
+        };
+
+        // Modal de Repositório de Tour Virtual (apenas Tours, sem Fotos 360)
+        const TourVirtualModal = ({ isOpen, onClose, companiesData }) => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [previewItem, setPreviewItem] = useState(null);
+
+            // Mesclar dados da planilha com embeds manuais
+            const companiesDataMesclada = useMemo(() => {
+                return mesclarEmbedsManuais(companiesData);
+            }, [companiesData]);
+
+            // Apenas Tours Virtuais (sem Fotos 360)
+            const toursVirtuais = useMemo(() => {
+                return companiesDataMesclada.filter(c => c.linkTour && c.linkTour !== "N/A" && c.linkTour.trim() !== "");
+            }, [companiesDataMesclada]);
+
+            // Filtrar por busca
+            const itemsFiltrados = useMemo(() => {
+                if (!searchTerm.trim()) return toursVirtuais;
+                
+                const term = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                return toursVirtuais.filter(item => {
+                    const name = (item.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const category = (item.category || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const kws = (item.keywords || []).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+                    
+                    return name.includes(term) || category.includes(term) || kws.some(k => k.includes(term));
+                });
+            }, [searchTerm, toursVirtuais]);
+
+            useEffect(() => {
+                if (!isOpen) {
+                    setSearchTerm('');
+                    setPreviewItem(null);
+                }
+            }, [isOpen]);
+
+            const abrirPreview = (item) => {
+                setPreviewItem(item);
+            };
+
+            const fecharPreview = () => {
+                setPreviewItem(null);
+            };
+
+            const getCorClasses = () => ({
+                border: 'border-orange-500/50', 
+                bg: 'bg-orange-500/10', 
+                text: 'text-orange-400', 
+                hover: 'hover:border-orange-500/50 hover:bg-orange-500/5'
+            });
+
+            if (!isOpen) return null;
+
+            const cores = getCorClasses();
+
             return React.createElement(React.Fragment, null,
-                React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4" },
-                    React.createElement("div", { className: "bg-[#2c2c2c] p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-700" },
-                        React.createElement("div", { className: "flex justify-between items-center mb-4" },
-                            React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, "📸 Fotos 360 e Tour Virtual"),
-                            React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
-                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4" },
+                    React.createElement("div", { className: "bg-black rounded-xl shadow-2xl w-full max-w-5xl h-[95vh] md:h-[90vh] border border-gray-900 flex flex-col" },
+                        // Header
+                        React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-900 bg-black rounded-t-xl" },
+                            React.createElement("div", { className: "flex items-center gap-3" },
+                                React.createElement("div", { className: "w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center" },
+                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-orange-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" }),
+                                        React.createElement("circle", { cx: "12", cy: "12", r: "3", strokeWidth: "1.5", stroke: "currentColor", fill: "none" })
+                                    )
+                                ),
+                                React.createElement("div", null,
+                                    React.createElement("h3", { className: "text-lg font-semibold text-white" }, "Tour Virtual"),
+                                    React.createElement("p", { className: "text-xs text-gray-400" }, `${toursVirtuais.length} tours disponíveis`)
+                                )
+                            ),
+                            React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                     React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
                                 )
                             )
                         ),
-                        React.createElement("div", { className: "mb-4" },
-                            React.createElement("input", {
-                                type: "text",
-                                className: "w-full pl-4 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all text-sm backdrop-blur-xl",
-                                placeholder: "Buscar cliente com fotos 360 ou tour...",
-                                value: searchTerm,
-                                onChange: handleSearch,
-                                autoFocus: true
-                            })
-                        ),
-                        React.createElement("div", { className: "max-h-80 overflow-y-auto custom-scrollbar" },
-                            searchResults.length > 0 ? (
-                                searchResults.map((company) => (
-                                    React.createElement("div", {
-                                        key: company.id,
-                                        onClick: () => handleLinkClick(company),
-                                        className: "hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-all flex justify-between items-center group border-b border-white/5 last:border-0"
-                                    },
-                                        React.createElement("div", { className: "flex-1" },
-                                            React.createElement("p", { className: "font-semibold text-white group-hover:text-orange-400 transition-colors text-sm" }, company.name),
-                                            React.createElement("p", { className: "text-[10px] text-gray-500 mt-1 truncate" }, company.category)
-                                        ),
-                                        React.createElement("span", { className: "text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg" }, "→")
+                        // Barra de busca
+                        React.createElement("div", { className: "p-4 border-b border-gray-900 bg-black" },
+                            React.createElement("div", { className: "relative" },
+                                React.createElement("input", {
+                                    type: "text",
+                                    className: "w-full pl-10 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 transition-all text-sm backdrop-blur-xl",
+                                    placeholder: "Buscar tour virtual por cliente...",
+                                    value: searchTerm,
+                                    onChange: (e) => setSearchTerm(e.target.value),
+                                    autoFocus: true
+                                }),
+                                React.createElement("div", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" },
+                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" })
                                     )
-                                ))
-                            ) : searchTerm.length > 0 ? (
-                                React.createElement("div", { className: "p-8 text-center text-mono text-gray-500" }, `Nenhum resultado encontrado para: ${searchTerm}`)
-                            ) : (
-                                React.createElement("div", { className: "p-6 text-center text-gray-500 text-sm" }, 
-                                    "Digite o nome do cliente para buscar fotos 360 ou tours"
                                 )
                             )
                         ),
-                        React.createElement("div", { className: "mt-4 pt-3 border-t border-white/10 flex justify-between items-center" },
-                            React.createElement("span", { className: "text-[10px] text-gray-500" }, 
-                                `${companiesData.filter(c => c.linkTour && c.linkTour !== "N/A" && c.linkTour.trim() !== "").length} itens disponíveis`
-                            ),
-                            React.createElement("button", { onClick: onClose, className: "text-xs text-gray-400 hover:text-white transition-colors" }, "Fechar")
+                        // Lista de Tours
+                        React.createElement("div", { className: "flex-1 overflow-y-auto custom-scrollbar p-4" },
+                            itemsFiltrados.length > 0 ? (
+                                React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+                                    itemsFiltrados.map((item, index) => {
+                                        const url = item.linkTour;
+                                        const isEmbeddableUrl = isEmbeddable(url);
+                                        
+                                        return React.createElement("div", {
+                                            key: item.id || index,
+                                            onClick: () => abrirPreview(item),
+                                            className: `bg-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer ${cores.hover} transition-all group`
+                                        },
+                                            React.createElement("div", { className: "flex items-start gap-3 p-3" },
+                                                // Thumbnail / Ícone
+                                                React.createElement("div", { className: "relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center" },
+                                                    React.createElement("span", { className: "text-3xl" }, "🎯"),
+                                                    // Badge de embeddable
+                                                    isEmbeddableUrl && React.createElement("div", { className: "absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full" })
+                                                ),
+                                                // Info
+                                                React.createElement("div", { className: "flex-1 min-w-0" },
+                                                    React.createElement("h4", { className: "text-white font-semibold text-sm mb-1 group-hover:text-green-400 transition-colors truncate" }, item.name),
+                                                    React.createElement("p", { className: "text-gray-400 text-xs line-clamp-2 mb-2" }, item.category || "Sem categoria"),
+                                                    // Tags/Keywords
+                                                    item.keywords && item.keywords.length > 0 && (
+                                                        React.createElement("div", { className: "flex flex-wrap gap-1" },
+                                                            item.keywords.slice(0, 3).map((kw, i) => (
+                                                                React.createElement("span", { key: i, className: "text-[10px] px-2 py-0.5 bg-white/5 rounded text-gray-500 truncate max-w-[80px]" }, kw)
+                                                            ))
+                                                        )
+                                                    ),
+                                                    // Ações rápidas
+                                                    React.createElement("div", { className: "mt-2 flex items-center gap-2" },
+                                                        React.createElement("span", { className: `text-xs ${cores.text} flex items-center gap-1` },
+                                                            React.createElement("span", null, "Visualizar"),
+                                                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" })
+                                                            )
+                                                        ),
+                                                        React.createElement("span", { className: "text-gray-600" }, "|"),
+                                                        React.createElement("button", {
+                                                            onClick: (e) => {
+                                                                e.stopPropagation();
+                                                                window.open(url, '_blank');
+                                                            },
+                                                            className: "text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                                                        },
+                                                            React.createElement("span", null, "Abrir"),
+                                                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" })
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        );
+                                    })
+                                )
+                            ) : searchTerm.length > 0 ? (
+                                React.createElement("div", { className: "p-8 text-center" },
+                                    React.createElement("div", { className: "text-4xl mb-4" }, "🔍"),
+                                    React.createElement("p", { className: "text-gray-400" }, `Nenhum resultado encontrado para: "${searchTerm}"`),
+                                    React.createElement("p", { className: "text-gray-600 text-sm mt-2" }, "Tente buscar com outras palavras-chave")
+                                )
+                            ) : (
+                                React.createElement("div", { className: "p-8 text-center" },
+                                    React.createElement("div", { className: "text-4xl mb-4" }, "🎯"),
+                                    React.createElement("p", { className: "text-gray-400" }, "Tours Virtuais disponíveis"),
+                                    React.createElement("p", { className: "text-gray-600 text-sm mt-2" }, "Use a busca acima para encontrar um cliente específico")
+                                )
+                            )
+                        ),
+                        // Footer
+                        React.createElement("div", { className: "p-4 border-t border-gray-900 bg-black rounded-b-xl" },
+                            React.createElement("div", { className: "flex justify-between items-center" },
+                                React.createElement("p", { className: "text-center text-gray-500 text-xs" }, 
+                                    `${itemsFiltrados.length} de ${toursVirtuais.length} tours virtuais`
+                                ),
+                                React.createElement("div", { className: "flex gap-4 text-xs text-gray-500" },
+                                    React.createElement("span", { className: "flex items-center gap-1" },
+                                        React.createElement("span", { className: "w-2 h-2 bg-green-500 rounded-full" }),
+                                        "Embed disponível"
+                                    )
+                                )
+                            )
                         )
                     )
                 ),
-                React.createElement(TourPreviewModal, {
-                    isOpen: !!previewCompany,
-                    onClose: closePreview,
-                    company: previewCompany
+                // Preview do item selecionado
+                React.createElement(TourVirtualPreviewModal, {
+                    isOpen: !!previewItem,
+                    onClose: fecharPreview,
+                    item: previewItem
                 })
             );
         };
 
-        const DarkButton = ({ children, onClick, className = '', buttonColor = 'bg-[#0a0a0a]', icon = null, style = {} }) => {
+        // Modal de Repositório de Empresas (Criações e Atualizações)
+        const EmpresasRepositorioModal = ({ isOpen, onClose, companiesData, categoriaInicial = 'todas' }) => {
+            const [categoriaAtiva, setCategoriaAtiva] = useState(categoriaInicial);
+            const [searchTerm, setSearchTerm] = useState('');
+
+            // Categorias disponíveis
+            const categorias = {
+                todas: {
+                    titulo: 'Todas as Empresas',
+                    icone: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" })
+                    ),
+                    cor: 'blue',
+                    filtro: () => true
+                },
+                criacoes: {
+                    titulo: 'Criações',
+                    icone: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M13 10V3L4 14h7v7l9-11h-7z" })
+                    ),
+                    cor: 'cyan',
+                    filtro: (c) => c.type?.toLowerCase().includes('cria')
+                },
+                atualizacoes: {
+                    titulo: 'Atualizações',
+                    icone: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" })
+                    ),
+                    cor: 'green',
+                    filtro: (c) => c.type?.toLowerCase().includes('atua')
+                }
+            };
+
+            // Filtrar empresas por categoria
+            const empresasFiltradas = useMemo(() => {
+                const categoria = categorias[categoriaAtiva];
+                return companiesData.filter(categoria.filtro);
+            }, [companiesData, categoriaAtiva]);
+
+            // Busca por palavras-chave (nome, categoria, keywords)
+            const empresasBuscadas = useMemo(() => {
+                if (!searchTerm.trim()) return empresasFiltradas;
+                
+                const term = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                
+                return empresasFiltradas.filter(empresa => {
+                    const name = (empresa.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const category = (empresa.category || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const type = (empresa.type || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const kws = (empresa.keywords || []).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+                    
+                    return name.includes(term) || 
+                           category.includes(term) || 
+                           type.includes(term) ||
+                           kws.some(k => k.includes(term));
+                });
+            }, [searchTerm, empresasFiltradas]);
+
+            useEffect(() => {
+                if (!isOpen) {
+                    setSearchTerm('');
+                    setCategoriaAtiva('todas');
+                } else {
+                    setCategoriaAtiva(categoriaInicial);
+                }
+            }, [isOpen, categoriaInicial]);
+
+            const handleCompanyClick = (company) => {
+                if (company.link && company.link !== "N/A") {
+                    window.open(company.link, '_blank');
+                } else {
+                    const searchQuery = `${company.name} ${company.category || ''}`;
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
+                }
+            };
+
+            const getCorClasses = (cor) => ({
+                blue: { border: 'border-blue-500/50', bg: 'bg-blue-500/10', text: 'text-blue-400', hover: 'hover:border-blue-500/50 hover:bg-blue-500/5', badge: 'bg-blue-500' },
+                cyan: { border: 'border-cyan-500/50', bg: 'bg-cyan-500/10', text: 'text-cyan-400', hover: 'hover:border-cyan-500/50 hover:bg-cyan-500/5', badge: 'bg-cyan-500' },
+                green: { border: 'border-green-500/50', bg: 'bg-green-500/10', text: 'text-green-400', hover: 'hover:border-green-500/50 hover:bg-green-500/5', badge: 'bg-green-500' }
+            })[cor];
+
+            if (!isOpen) return null;
+
+            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-[200] p-2 md:p-4" },
+                React.createElement("div", { className: "bg-black rounded-xl shadow-2xl w-full max-w-5xl h-[95vh] md:h-[90vh] border border-gray-900 flex flex-col" },
+                    // Header
+                    React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-900 bg-black rounded-t-xl" },
+                        React.createElement("div", { className: "flex items-center gap-3" },
+                            React.createElement("div", { className: "w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-green-500/20 flex items-center justify-center" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-blue-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" })
+                                )
+                            ),
+                            React.createElement("div", null,
+                                React.createElement("h3", { className: "text-lg font-semibold text-white" }, "Repositório de Empresas"),
+                                React.createElement("p", { className: "text-xs text-gray-400" }, `${companiesData.length} empresas no ecossistema`)
+                            )
+                        ),
+                        React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
+                            )
+                        )
+                    ),
+                    // Abas de Categoria
+                    React.createElement("div", { className: "flex border-b border-gray-900 overflow-x-auto bg-black" },
+                        Object.keys(categorias).map((key) => {
+                            const cat = categorias[key];
+                            const isActive = categoriaAtiva === key;
+                            const cores = getCorClasses(cat.cor);
+                            const count = companiesData.filter(cat.filtro).length;
+                            
+                            return React.createElement("button", {
+                                key: key,
+                                onClick: () => {
+                                    setCategoriaAtiva(key);
+                                    setSearchTerm('');
+                                },
+                                className: `flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
+                                    isActive 
+                                        ? `${cores.text} border-b-2 ${cores.border} ${cores.bg}` 
+                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                }`
+                            },
+                                React.createElement("span", null, cat.icone),
+                                React.createElement("span", null, cat.titulo),
+                                React.createElement("span", { 
+                                    className: `ml-1 text-xs px-2 py-0.5 rounded-full ${isActive ? 'bg-white/10' : 'bg-gray-700'}` 
+                                }, count)
+                            );
+                        })
+                    ),
+                    // Barra de busca
+                    React.createElement("div", { className: "p-4 border-b border-gray-900 bg-black" },
+                        React.createElement("div", { className: "relative" },
+                            React.createElement("input", {
+                                type: "text",
+                                className: "w-full pl-10 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 transition-all text-sm backdrop-blur-xl",
+                                placeholder: "Buscar por nome, categoria, tipo ou palavras-chave...",
+                                value: searchTerm,
+                                onChange: (e) => setSearchTerm(e.target.value),
+                                autoFocus: true
+                            }),
+                            React.createElement("div", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" })
+                                )
+                            )
+                        )
+                    ),
+                    // Lista de Empresas
+                    React.createElement("div", { className: "flex-1 overflow-y-auto custom-scrollbar p-4" },
+                        empresasBuscadas.length > 0 ? (
+                            React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+                                empresasBuscadas.map((empresa, index) => {
+                                    const isCriacao = empresa.type?.toLowerCase().includes('cria');
+                                    const isAtualizacao = empresa.type?.toLowerCase().includes('atua');
+                                    const corTipo = isCriacao ? 'cyan' : isAtualizacao ? 'green' : 'gray';
+                                    const cores = getCorClasses(corTipo === 'gray' ? 'blue' : corTipo);
+                                    
+                                    return React.createElement("div", {
+                                        key: empresa.id || index,
+                                        onClick: () => handleCompanyClick(empresa),
+                                        className: `bg-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer ${cores.hover} transition-all group`
+                                    },
+                                        React.createElement("div", { className: "p-4" },
+                                            // Header do card
+                                            React.createElement("div", { className: "flex items-start justify-between mb-2" },
+                                                React.createElement("div", { className: "flex items-center gap-2" },
+                                                    // Badge de tipo
+                                                    React.createElement("span", { 
+                                                        className: `text-[10px] px-2 py-0.5 rounded-full ${
+                                                            isCriacao ? 'bg-cyan-500/20 text-cyan-400' : 
+                                                            isAtualizacao ? 'bg-green-500/20 text-green-400' : 
+                                                            'bg-gray-500/20 text-gray-400'
+                                                        }` 
+                                                    }, 
+                                                        empresa.type || "Geral"
+                                                    ),
+                                                    // Indicador de link disponível
+                                                    empresa.link && empresa.link !== "N/A" && React.createElement("span", { 
+                                                        className: "w-2 h-2 bg-green-500 rounded-full" 
+                                                    })
+                                                ),
+                                                React.createElement("span", { className: "text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" }, "→")
+                                            ),
+                                            // Nome da empresa
+                                            React.createElement("h4", { className: "text-white font-semibold text-sm mb-1 group-hover:text-green-400 transition-colors" }, 
+                                                empresa.name
+                                            ),
+                                            // Categoria
+                                            React.createElement("p", { className: "text-gray-400 text-xs mb-2" }, 
+                                                empresa.category || "Sem categoria"
+                                            ),
+                                            // Keywords
+                                            empresa.keywords && empresa.keywords.length > 0 && (
+                                                React.createElement("div", { className: "flex flex-wrap gap-1 mt-2" },
+                                                    empresa.keywords.slice(0, 4).map((kw, i) => (
+                                                        React.createElement("span", { 
+                                                            key: i, 
+                                                            className: "text-[10px] px-2 py-0.5 bg-white/5 rounded text-gray-500" 
+                                                        }, kw)
+                                                    ))
+                                                )
+                                            )
+                                        )
+                                    );
+                                })
+                            )
+                        ) : searchTerm.length > 0 ? (
+                            React.createElement("div", { className: "p-8 text-center" },
+                                React.createElement("div", { className: "text-4xl mb-4" }, "🔍"),
+                                React.createElement("p", { className: "text-gray-400" }, `Nenhum resultado encontrado para: "${searchTerm}"`),
+                                React.createElement("p", { className: "text-gray-600 text-sm mt-2" }, "Tente buscar com outras palavras-chave")
+                            )
+                        ) : (
+                            React.createElement("div", { className: "p-8 text-center" },
+                                React.createElement("div", { className: "text-4xl mb-4" }, categorias[categoriaAtiva].icone),
+                                React.createElement("p", { className: "text-gray-400" }, `${categorias[categoriaAtiva].titulo}`),
+                                React.createElement("p", { className: "text-gray-600 text-sm mt-2" }, "Use a busca acima para encontrar empresas")
+                            )
+                        )
+                    ),
+                    // Footer
+                    React.createElement("div", { className: "p-4 border-t border-gray-900 bg-black rounded-b-xl" },
+                        React.createElement("div", { className: "flex justify-between items-center" },
+                            React.createElement("p", { className: "text-center text-gray-500 text-xs" }, 
+                                `${empresasBuscadas.length} de ${empresasFiltradas.length} empresas`
+                            ),
+                            React.createElement("div", { className: "flex gap-4 text-xs text-gray-500" },
+                                React.createElement("span", { className: "flex items-center gap-1" },
+                                    React.createElement("span", { className: "w-2 h-2 bg-green-500 rounded-full" }),
+                                    "Link disponível"
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        };
+
+        const DarkButton = ({ children, onClick, className = '', buttonColor = 'bg-black', icon = null, style = {} }) => {
             return React.createElement("button", {
                 onClick: onClick,
                 style: style,
-                className: `relative ${buttonColor} text-white py-4 px-6 rounded-xl premium-border btn-futuristic transition-all duration-500 hover:scale-[1.02] active:scale-95 group flex items-center justify-center space-x-3 overflow-hidden ${className}`
+                className: `relative ${buttonColor} text-white py-4 px-6 rounded-xl border border-white/10 hover:border-green-500/30 transition-all duration-500 hover:scale-[1.02] active:scale-95 group flex items-center justify-center space-x-3 overflow-hidden ${className}`
             },
                 React.createElement("div", { className: "absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" }),
                 icon && React.createElement("span", { className: "text-lg opacity-70 group-hover:opacity-100 transition-opacity" }, icon),
@@ -966,7 +1553,10 @@
             setShowSitesModal,
             setShowVideosModal,
             setShowLinks360Modal,
-            setShowTourModal
+            setShowTourModal,
+            setShowEmpresasModal,
+            setEmpresasCategoriaInicial,
+            setShowLinksAG5Modal
         }) => {
 
             const handleCompanyClick = (company) => {
@@ -981,7 +1571,7 @@
                 setShowCompanyDetails(false);
             };
 
-            // Contadores
+            // Contadores (apenas dados da planilha, sem duplicar manuais)
             const totalSitesPadrao = companiesData.filter(c => c.tipoSite && c.tipoSite.toLowerCase().includes('padr')).length;
             const totalSitesPerson = companiesData.filter(c => c.tipoSite && c.tipoSite.toLowerCase().includes('person')).length;
             const total360 = companiesData.filter(c => c.link360 && c.link360 !== "N/A" && c.link360.trim() !== "").length;
@@ -1013,15 +1603,27 @@
                             React.createElement("span", { className: "text-green-500 animate-pulse" }, "● LIVE")
                         ),
                         React.createElement("div", { className: "grid grid-cols-2 gap-4" },
-                            // Criação
-                            React.createElement("div", { className: "border-r border-white/10 pr-4" },
+                            // Criação - clicável
+                            React.createElement("div", { 
+                                className: "border-r border-white/10 pr-4 cursor-pointer hover:bg-white/5 rounded-lg transition-colors p-2 -m-2",
+                                onClick: () => {
+                                    setEmpresasCategoriaInicial('criacoes');
+                                    setShowEmpresasModal(true);
+                                }
+                            },
                                 React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Criações"),
                                 React.createElement("div", { className: "text-4xl font-bold text-white tracking-tighter" },
                                     companiesData.filter(c => c.type?.toLowerCase().includes('cria')).length
                                 )
                             ),
-                            // Atualização
-                            React.createElement("div", { className: "pl-2" },
+                            // Atualização - clicável
+                            React.createElement("div", { 
+                                className: "pl-2 cursor-pointer hover:bg-white/5 rounded-lg transition-colors p-2 -m-2",
+                                onClick: () => {
+                                    setEmpresasCategoriaInicial('atualizacoes');
+                                    setShowEmpresasModal(true);
+                                }
+                            },
                                 React.createElement("div", { className: "text-[10px] text-gray-400 uppercase tracking-widest mb-1" }, "Atualizações"),
                                 React.createElement("div", { className: "text-4xl font-bold text-green-500 tracking-tighter" },
                                     companiesData.filter(c => c.type?.toLowerCase().includes('atua')).length
@@ -1029,9 +1631,15 @@
                             )
                         ),
                         React.createElement("div", { className: "mt-4 pt-3 border-t border-white/5 flex justify-between items-end" },
-                            React.createElement("div", null,
+                            React.createElement("div", { 
+                                className: "cursor-pointer hover:bg-white/5 rounded-lg p-2 -m-2 transition-colors",
+                                onClick: () => {
+                                    setEmpresasCategoriaInicial('todas');
+                                    setShowEmpresasModal(true);
+                                }
+                            },
                                 React.createElement("span", { className: "text-[10px] text-gray-500 uppercase block" }, "Total Geral"),
-                                React.createElement("span", { className: "text-xl font-bold text-white" }, companiesData.length)
+                                React.createElement("span", { className: "text-xl font-bold text-white hover:text-green-400 transition-colors" }, companiesData.length)
                             ),
                             React.createElement("div", { className: "text-[9px] text-gray-600 text-mono" }, "SINCRO_DATA_OK")
                         )
@@ -1052,7 +1660,9 @@
                             React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Sites Padrão"),
                             React.createElement("div", { className: "text-3xl font-bold text-blue-400 tracking-tighter" }, totalSitesPadrao)
                         ),
-                        React.createElement("span", { className: "text-2xl" }, "🌐")
+                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-blue-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" })
+                        )
                     ),
                     React.createElement("div", {
                         className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between cursor-pointer hover:border-cyan-500/40 hover:shadow-cyan-500/10 hover:shadow-lg transition-all",
@@ -1062,7 +1672,9 @@
                             React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Sites Person."),
                             React.createElement("div", { className: "text-3xl font-bold text-cyan-400 tracking-tighter" }, totalSitesPerson)
                         ),
-                        React.createElement("span", { className: "text-2xl" }, "✨")
+                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-cyan-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" })
+                        )
                     ),
                     React.createElement("div", { 
                         className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between cursor-pointer hover:border-purple-500/40 hover:shadow-purple-500/10 hover:shadow-lg transition-all",
@@ -1072,71 +1684,79 @@
                             React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Links 360"),
                             React.createElement("div", { className: "text-3xl font-bold text-purple-400 tracking-tighter" }, total360)
                         ),
-                        React.createElement("span", { className: "text-2xl" }, "📷")
+                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                            React.createElement("rect", { x: "2", y: "2", width: "20", height: "20", rx: "5", ry: "5", strokeWidth: "1.5" }),
+                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" }),
+                            React.createElement("line", { x1: "17.5", y1: "6.5", x2: "17.51", y2: "6.5", strokeWidth: "1.5" })
+                        )
                     ),
                     React.createElement("div", { 
                         className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between cursor-pointer hover:border-orange-500/40 hover:shadow-orange-500/10 hover:shadow-lg transition-all",
                         onClick: () => setShowTourModal(true)
                     },
                         React.createElement("div", null,
-                            React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Tour Virtual / Foto 360º"),
+                            React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Tour Virtual"),
                             React.createElement("div", { className: "text-3xl font-bold text-orange-400 tracking-tighter" }, totalTour)
                         ),
-                        React.createElement("span", { className: "text-2xl" }, "📸")
-                    )
-                ),
-
-                React.createElement("div", { className: "w-full max-w-2xl mb-12 relative" },
-                    React.createElement("div", { className: "absolute -inset-1 bg-gradient-to-r from-green-500/10 to-transparent rounded-2xl blur opacity-20 transition duration-1000" }),
-                    React.createElement("div", { className: "relative" },
-                        React.createElement("input", {
-                            type: "text",
-                            className: "w-full pl-6 pr-12 py-6 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-700 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 transition-all text-lg backdrop-blur-xl",
-                            placeholder: "EXECUTAR BUSCA NO ECOSSISTEMA...",
-                            value: searchTerm,
-                            onChange: handleSearch
-                        }),
-                        React.createElement("div", { className: "absolute right-5 top-1/2 -translate-y-1/2 text-green-500/50 text-xs text-mono" }, "CTRL+K")
-                    ),
-
-                    showCompanyDetails && (
-                        React.createElement("div", { className: "absolute top-full mt-2 left-0 right-0 glass-panel rounded-xl shadow-2xl border border-white/10 z-[100] max-h-96 overflow-y-auto custom-scrollbar p-2" },
-                            searchResults.length > 0 ? (
-                                searchResults.map((company) => (
-                                    React.createElement("div", {
-                                        key: company.id,
-                                        onClick: () => handleCompanyClick(company),
-                                        className: "hover:bg-white/5 p-4 rounded-lg cursor-pointer transition-all flex justify-between items-center group"
-                                    },
-                                        React.createElement("div", null,
-                                            React.createElement("p", { className: "font-bold text-white group-hover:text-green-400 transition-colors uppercase tracking-tight" }, company.name),
-                                            React.createElement("p", { className: "text-mono mt-1" }, company.category)
-                                        ),
-                                        React.createElement("span", { className: "text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" }, "→")
-                                    )
-                                ))
-                            ) : searchTerm.length > 0 && (
-                                React.createElement("div", { className: "p-8 text-center text-mono" }, `NENHUM DADO ENCONTRADO PARA: ${searchTerm}`)
-                            )
+                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-orange-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" }),
+                            React.createElement("circle", { cx: "12", cy: "12", r: "3", strokeWidth: "1.5", stroke: "currentColor", fill: "none" })
                         )
                     )
                 ),
 
-                React.createElement("div", { className: "w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-4" },
+                React.createElement("div", { className: "w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-4 mt-8" },
                     React.createElement("div", { className: "md:col-span-2 grid grid-cols-2 gap-4" },
-                        React.createElement(DarkButton, { onClick: () => setShowVideosModal(true), className: "h-32" }, "🎬 Vídeos Comerciais"),
-                        React.createElement(DarkButton, { onClick: () => window.open('https://www.superchat.com/pt/tools/google-review-link-generator', '_blank'), className: "h-32" }, "⭐ Google Link"),
-                        React.createElement(DarkButton, { onClick: () => setCurrentPage('client-results'), className: "h-32" }, "📊 Resultados"),
-                        React.createElement(DarkButton, { onClick: () => window.open('https://drive.google.com/drive/folders/1Tq7zhcjDhXTxJ5q2T7vtJfyNqTF7W-7N', '_blank'), className: "h-32" }, "💬 Feedbacks")
+                        React.createElement(DarkButton, { 
+                            onClick: () => setShowVideosModal(true), 
+                            className: "h-32",
+                            icon: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" })
+                            )
+                        }, "Vídeos Comerciais"),
+                        React.createElement(DarkButton, { 
+                            onClick: () => setShowLinksAG5Modal(true), 
+                            className: "h-32",
+                            icon: React.createElement("img", { src: "assets/Logo- AG5 - Oficial (14).png", className: "h-8 w-8 object-contain", alt: "AG5" })
+                        }, "Links AG5"),
+                        React.createElement(DarkButton, { 
+                            onClick: () => setCurrentPage('client-results'), 
+                            className: "h-32",
+                            icon: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-blue-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" })
+                            )
+                        }, "Resultados"),
+                        React.createElement(DarkButton, { 
+                            onClick: () => window.open('https://drive.google.com/drive/folders/1Tq7zhcjDhXTxJ5q2T7vtJfyNqTF7W-7N', '_blank'), 
+                            className: "h-32",
+                            icon: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-green-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" })
+                            )
+                        }, "Feedbacks")
                     ),
                     React.createElement("div", { className: "flex flex-col gap-4" },
-                        React.createElement(DarkButton, { onClick: () => setCurrentPage('sales-insights'), className: "flex-1" }, "💡 Insights"),
-                        React.createElement(DarkButton, { onClick: () => showAlertModal('Em Breve', 'Módulo de metas em desenvolvimento.'), className: "flex-1" }, "🎯 Metas"),
+                        React.createElement(DarkButton, { 
+                            onClick: () => window.open('https://www.superchat.com/pt/tools/google-review-link-generator', '_blank'), 
+                            className: "flex-1",
+                            icon: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-yellow-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" })
+                            )
+                        }, "Gerador de Avaliação"),
+                        React.createElement(DarkButton, { 
+                            onClick: () => showAlertModal('Em Breve', 'Módulo de metas em desenvolvimento.'), 
+                            className: "flex-1",
+                            icon: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-red-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M13 10V3L4 14h7v7l9-11h-7z" })
+                            )
+                        }, "Metas"),
                         React.createElement(DarkButton, {
                             onClick: () => window.open('https://ag5.conexaoazul.com/odoo/crm', '_blank'),
                             buttonColor: "bg-purple-600/10 hover:bg-purple-600/20",
-                            className: "flex-1 border-purple-500/30"
-                        }, "🔗 CRM ODOO")
+                            className: "flex-1 border-purple-500/30",
+                            icon: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" })
+                            )
+                        }, "CRM ODOO")
                     )
                 ),
 
@@ -1154,7 +1774,7 @@
         const ClientResultsPage = ({ setCurrentPage, appBgColor, showAlertModal }) => {
             return React.createElement("div", { className: "min-h-screen p-4 md:p-6 text-white flex flex-col items-center", style: { backgroundColor: appBgColor } },
                 React.createElement("h2", { className: "text-2xl md:text-3xl font-bold mb-6 text-center" }, "Resultados dos Clientes"),
-                React.createElement("div", { className: `w-full max-w-2xl bg-[#2c2c2c] rounded-xl p-6 shadow-xl border border-gray-700` },
+                React.createElement("div", { className: `w-full max-w-2xl bg-black rounded-xl p-6 shadow-xl border border-gray-900` },
                     React.createElement("p", { className: "text-gray-300 text-center mb-4 text-sm md:text-base" }, "Aqui você encontrará os PDFs com os resultados e relatórios de desempenho dos nossos clientes."),
                     React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
                         ['Relatório Mensal', 'Desempenho Google', 'Impacto Digital'].map(client => (
@@ -1172,7 +1792,7 @@
         const SalesInsightsPage = ({ setCurrentPage, appBgColor }) => {
             return React.createElement("div", { className: "min-h-screen p-4 md:p-6 text-white flex flex-col items-center", style: { backgroundColor: appBgColor } },
                 React.createElement("h2", { className: "text-2xl md:text-3xl font-bold mb-6 text-center" }, "💡 Insights de Vendas"),
-                React.createElement("div", { className: `w-full max-w-3xl bg-[#2c2c2c] rounded-xl p-6 md:p-8 shadow-xl border border-gray-700 overflow-y-auto custom-scrollbar`, style: { maxHeight: 'calc(100vh - 150px)' } },
+                React.createElement("div", { className: `w-full max-w-3xl bg-black rounded-xl p-6 md:p-8 shadow-xl border border-gray-900 overflow-y-auto custom-scrollbar`, style: { maxHeight: 'calc(100vh - 150px)' } },
                     React.createElement("h3", { className: "text-xl text-green-500 font-bold mb-4" }, "Técnicas de Fechamento"),
                     React.createElement("p", { className: "text-gray-300 mb-4" }, "O segredo da venda não está no preço, mas no valor percebido pelo cliente. Foque em como a atualização do Google Meu Negócio vai trazer MAIS dinheiro para o negócio dele."),
                     React.createElement("ul", { className: "space-y-4" },
@@ -1200,7 +1820,9 @@
             const [showVideosModal, setShowVideosModal] = useState(false);
             const [showLinks360Modal, setShowLinks360Modal] = useState(false);
             const [showTourModal, setShowTourModal] = useState(false);
-
+            const [showEmpresasModal, setShowEmpresasModal] = useState(false);
+            const [empresasCategoriaInicial, setEmpresasCategoriaInicial] = useState('todas');
+            const [showLinksAG5Modal, setShowLinksAG5Modal] = useState(false);
 
             const showAlertModal = (title, message) => setModalInfo({ isOpen: true, title, message });
             const closeModal = () => setModalInfo({ isOpen: false, title: '', message: '' });
@@ -1215,9 +1837,25 @@
                     complete: (results) => {
                         const formatted = results.data.map(item => {
                             const getVal = (keys) => {
-                                const found = Object.keys(item).find(k => keys.includes(k.trim().toLowerCase()));
-                                return found ? item[found] : "";
+                                // Tenta encontrar a chave exata ou normalizada
+                                const foundKey = Object.keys(item).find(k => keys.includes(k.trim().toLowerCase()));
+                                
+                                // Caso especial para colunas duplicadas como 'Link 360'
+                                if (keys.includes('link 360')) {
+                                    const allLinks360 = Object.keys(item).filter(k => k.trim().toLowerCase() === 'link 360');
+                                    if (allLinks360.length > 1) {
+                                        // Procura o valor que começa com http (o link), ignorando o status ("Feito")
+                                        for (const k of allLinks360) {
+                                            if ((item[k] || "").trim().startsWith('http')) return item[k].trim();
+                                        }
+                                    }
+                                }
+                                
+                                return foundKey ? (item[foundKey] || "").trim() : "";
                             };
+                            // Link da coluna M "Tuor Virtual / Foto 360" (link do Google Maps)
+                            const linkTourOriginal = getVal(['tuor virtual / foto 360', 'tour virtual / foto 360', 'fotos 360 e tour virtual', 'tour virtual', 'link tour']);
+                            
                             return {
                                 id: getVal(['id']) || Math.random(),
                                 name: getVal(['nome da empresa', 'nome', 'name']),
@@ -1230,7 +1868,8 @@
                                 tipoSite: getVal(['tipo de site', 'tipo site']),
                                 link360: getVal(['link 360']),
                                 linkSiteSEO: getVal(['link site personalizados e seo', 'link site']),
-                                linkTour: getVal(['fotos 360 e tour virtual', 'tour virtual', 'link tour'])
+                                linkTourOriginal: linkTourOriginal, // Link da coluna M (para "Ver no Google")
+                                linkTour: linkTourOriginal // Inicialmente igual, será mesclado com embed manual depois
                             };
 
                         }).filter(item => item.name);
@@ -1264,16 +1903,32 @@
                     appBgColor, motivationalMessage, searchTerm, handleSearch,
                     showCompanyDetails, searchResults, setShowCompanyDetails,
                     setCurrentPage, companiesData, showAlertModal, setShowSitesModal,
-                    setShowVideosModal, setShowLinks360Modal, setShowTourModal
+                    setShowVideosModal, setShowLinks360Modal, setShowTourModal,
+                    setShowEmpresasModal, setEmpresasCategoriaInicial,
+                    setShowLinksAG5Modal
                 }) :
                     currentPage === 'client-results' ? React.createElement(ClientResultsPage, { setCurrentPage, appBgColor, showAlertModal }) :
                         React.createElement(SalesInsightsPage, { setCurrentPage, appBgColor }),
                 React.createElement(Modal, { isOpen: modalInfo.isOpen, onClose: closeModal, title: modalInfo.title }, modalInfo.message),
                 React.createElement(SitesSearchModal, { isOpen: showSitesModal, onClose: () => setShowSitesModal(false), companiesData }),
                 React.createElement(Links360SearchModal, { isOpen: showLinks360Modal, onClose: () => setShowLinks360Modal(false), companiesData }),
-                React.createElement(TourSearchModal, { isOpen: showTourModal, onClose: () => setShowTourModal(false), companiesData }),
+                // Modal de Tour Virtual (novo estilo repositório)
+                React.createElement(TourVirtualModal, { isOpen: showTourModal, onClose: () => setShowTourModal(false), companiesData }),
                 // Modal de Vídeos Comerciais
-                React.createElement(VideosComerciaisModal, { isOpen: showVideosModal, onClose: () => setShowVideosModal(false) })
+                React.createElement(VideosComerciaisModal, { isOpen: showVideosModal, onClose: () => setShowVideosModal(false) }),
+                // Modal de Repositório de Empresas (Criações e Atualizações)
+                React.createElement(EmpresasRepositorioModal, { 
+                    isOpen: showEmpresasModal, 
+                    onClose: () => setShowEmpresasModal(false), 
+                    companiesData,
+                    categoriaInicial: empresasCategoriaInicial
+                }),
+                // Modal de Links AG5
+                React.createElement(LinksAG5Modal, {
+                    isOpen: showLinksAG5Modal,
+                    onClose: () => setShowLinksAG5Modal(false),
+                    showAlertModal
+                })
             );
         }
 
