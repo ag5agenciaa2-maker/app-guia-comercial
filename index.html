@@ -292,7 +292,7 @@
                         { titulo: 'Dra. Aline - Presidente OAB/RJ', descricao: 'Posicionamento no Google para escritórios de advocacia', url: 'https://www.instagram.com/reel/DQ66hy_ET0Z/', thumbnail: 'assets/Dra. Aline.png' },
                         { titulo: 'Nayara Ribeiro - Advogada Imobiliária', descricao: 'Presidente da Comissão de Direitos Imobiliários OAB 29º', url: 'https://www.instagram.com/reel/DPyYm-YDXaa/', thumbnail: 'assets/Dra. Nayara.png' },
                         { titulo: 'Júnior - Shineray/SV Automóveis', descricao: 'Concessionária de Carros, Motos e Aluguel', url: 'https://www.instagram.com/reel/DPeYL0FDZzq/', thumbnail: 'assets/Junior Shineray.png' },
-                        { titulo: 'Dra. Ana Beatriz e Dra. Luana', descricao: 'Visibilidade no Google para escritórios', url: 'https://www.instagram.com/reel/DO61sjTj49e/' },
+
                         { titulo: 'Advogada - Albuquerque Lima', descricao: 'Luana - Presidente da Comissão de Marketing OAB 29º', url: 'https://www.instagram.com/reel/DOgkvYBjTtL/', thumbnail: 'assets/Dra. Luana.png' },
                         { titulo: 'Yago - Imobiliária', descricao: 'Comprador da República Checa em 10 dias', url: 'https://www.instagram.com/reel/DNa2TTSN1zt/', thumbnail: 'assets/Yago Imobiliaria.png' },
                         { titulo: 'Magno - Material de Construção', descricao: 'Depoimento de cliente', url: 'https://www.instagram.com/reel/DIjqWxlPSAb/', thumbnail: 'assets/Magno.png' }
@@ -311,7 +311,7 @@
                     icone: '📚',
                     videos: [
                         { titulo: 'Notícia Jornal Nacional', descricao: 'Sobre Avaliações no Google', url: 'https://www.instagram.com/reel/DPT8sujDfSz/', thumbnail: 'assets/Jornal-Band.png' },
-                        { titulo: 'Treinamento Pega a Senha', descricao: 'Conteúdo de capacitação', url: 'https://www.instagram.com/reel/DB9hkQfxm52/' }
+                        { titulo: 'Mentoria Pega a Senha', descricao: 'Conteúdo de capacitação', url: 'https://www.instagram.com/reel/DB9hkQfxm52/', thumbnail: 'assets/Mentoria-Pega-Senha.png' }
                     ]
                 }
             };
@@ -726,13 +726,16 @@
                         ),
                         React.createElement("span", { className: "text-2xl" }, "✨")
                     ),
-                    React.createElement("div", { className: "p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between" },
-                        React.createElement("div", null,
-                            React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Links 360"),
-                            React.createElement("div", { className: "text-3xl font-bold text-purple-400 tracking-tighter" }, total360)
-                        ),
-                        React.createElement("span", { className: "text-2xl" }, "📷")
-                    ),
+                    // Links 360 - Centralizado na versão web (col-span-2 em mobile, normal em desktop)
+                    React.createElement("div", { className: "col-span-2 md:col-span-1 flex justify-center" },
+                        React.createElement("div", { className: "w-full max-w-xs md:max-w-none p-4 glass-panel rounded-xl border border-white/5 flex items-center justify-between" },
+                            React.createElement("div", null,
+                                React.createElement("div", { className: "text-[10px] text-gray-500 uppercase tracking-widest mb-1" }, "Links 360"),
+                                React.createElement("div", { className: "text-3xl font-bold text-purple-400 tracking-tighter" }, total360)
+                            ),
+                            React.createElement("span", { className: "text-2xl" }, "📷")
+                        )
+                    )
                 ),
 
                 React.createElement("div", { className: "w-full max-w-2xl mb-12 relative" },
