@@ -688,17 +688,15 @@
             );
         };
 
-        // Modal de busca para Links 360
+        // Modal de busca para Links 360 (Fotos Instagram)
         const Links360SearchModal = ({ isOpen, onClose, companiesData }) => {
             const [searchTerm, setSearchTerm] = useState('');
             const [searchResults, setSearchResults] = useState([]);
-            const [previewCompany, setPreviewCompany] = useState(null);
 
             useEffect(() => {
                 if (!isOpen) {
                     setSearchTerm('');
                     setSearchResults([]);
-                    setPreviewCompany(null);
                 }
             }, [isOpen]);
 
@@ -724,79 +722,68 @@
 
             const handleLinkClick = (company) => {
                 if (company.link360 && company.link360 !== "N/A") {
-                    setPreviewCompany(company);
+                    window.open(company.link360, '_blank');
                 }
-            };
-
-            const closePreview = () => {
-                setPreviewCompany(null);
             };
 
             if (!isOpen) return null;
 
-            return React.createElement(React.Fragment, null,
-                React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4" },
-                    React.createElement("div", { className: "bg-black p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-900" },
-                        React.createElement("div", { className: "flex justify-between items-center mb-4" },
-                            React.createElement("div", { className: "flex items-center gap-2" },
-                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" }),
-                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 13a3 3 0 11-6 0 3 3 0 016 0z" })
-                                ),
-                                React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, "Links 360")
+            return React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4" },
+                React.createElement("div", { className: "bg-black p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-900" },
+                    React.createElement("div", { className: "flex justify-between items-center mb-4" },
+                        React.createElement("div", { className: "flex items-center gap-2" },
+                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" }),
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M15 13a3 3 0 11-6 0 3 3 0 016 0z" })
                             ),
-                            React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
-                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
-                                )
+                            React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, "Links 360")
+                        ),
+                        React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
+                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
                             )
-                        ),
-                        React.createElement("div", { className: "mb-4" },
-                            React.createElement("input", {
-                                type: "text",
-                                className: "w-full pl-4 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all text-sm backdrop-blur-xl",
-                                placeholder: "Buscar cliente com tour 360...",
-                                value: searchTerm,
-                                onChange: handleSearch,
-                                autoFocus: true
-                            })
-                        ),
-                        React.createElement("div", { className: "max-h-80 overflow-y-auto custom-scrollbar" },
-                            searchResults.length > 0 ? (
-                                searchResults.map((company) => (
-                                    React.createElement("div", {
-                                        key: company.id,
-                                        onClick: () => handleLinkClick(company),
-                                        className: "hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-all flex justify-between items-center group border-b border-white/5 last:border-0"
-                                    },
-                                        React.createElement("div", { className: "flex-1" },
-                                            React.createElement("p", { className: "font-semibold text-white group-hover:text-purple-400 transition-colors text-sm" }, company.name),
-                                            React.createElement("p", { className: "text-[10px] text-gray-500 mt-1 truncate" }, company.category)
-                                        ),
-                                        React.createElement("span", { className: "text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg" }, "→")
-                                    )
-                                ))
-                            ) : searchTerm.length > 0 ? (
-                                React.createElement("div", { className: "p-8 text-center text-mono text-gray-500" }, `Nenhum tour 360 encontrado para: ${searchTerm}`)
-                            ) : (
-                                React.createElement("div", { className: "p-6 text-center text-gray-500 text-sm" },
-                                    "Digite o nome do cliente para buscar tours 360"
-                                )
-                            )
-                        ),
-                        React.createElement("div", { className: "mt-4 pt-3 border-t border-white/10 flex justify-between items-center" },
-                            React.createElement("span", { className: "text-[10px] text-gray-500" },
-                                `${companiesData.filter(c => c.link360 && c.link360 !== "N/A" && c.link360.trim() !== "").length} tours disponíveis`
-                            ),
-                            React.createElement("button", { onClick: onClose, className: "text-xs text-gray-400 hover:text-white transition-colors" }, "Fechar")
                         )
+                    ),
+                    React.createElement("div", { className: "mb-4" },
+                        React.createElement("input", {
+                            type: "text",
+                            className: "w-full pl-4 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all text-sm backdrop-blur-xl",
+                            placeholder: "Buscar cliente com fotos 360...",
+                            value: searchTerm,
+                            onChange: handleSearch,
+                            autoFocus: true
+                        })
+                    ),
+                    React.createElement("div", { className: "max-h-80 overflow-y-auto custom-scrollbar" },
+                        searchResults.length > 0 ? (
+                            searchResults.map((company) => (
+                                React.createElement("div", {
+                                    key: company.id,
+                                    onClick: () => handleLinkClick(company),
+                                    className: "hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-all flex justify-between items-center group border-b border-white/5 last:border-0"
+                                },
+                                    React.createElement("div", { className: "flex-1" },
+                                        React.createElement("p", { className: "font-semibold text-white group-hover:text-purple-400 transition-colors text-sm" }, company.name),
+                                        React.createElement("p", { className: "text-[10px] text-gray-500 mt-1 truncate" }, company.category)
+                                    ),
+                                    React.createElement("span", { className: "text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg" }, "→")
+                                )
+                            ))
+                        ) : searchTerm.length > 0 ? (
+                            React.createElement("div", { className: "p-8 text-center text-mono text-gray-500" }, `Nenhum link 360 encontrado para: ${searchTerm}`)
+                        ) : (
+                            React.createElement("div", { className: "p-6 text-center text-gray-500 text-sm" },
+                                "Digite o nome do cliente para buscar fotos 360"
+                            )
+                        )
+                    ),
+                    React.createElement("div", { className: "mt-4 pt-3 border-t border-white/10 flex justify-between items-center" },
+                        React.createElement("span", { className: "text-[10px] text-gray-500" },
+                            `${companiesData.filter(c => c.link360 && c.link360 !== "N/A" && c.link360.trim() !== "").length} links disponíveis`
+                        ),
+                        React.createElement("button", { onClick: onClose, className: "text-xs text-gray-400 hover:text-white transition-colors" }, "Fechar")
                     )
-                ),
-                React.createElement(Link360PreviewModal, {
-                    isOpen: !!previewCompany,
-                    onClose: closePreview,
-                    company: previewCompany
-                })
+                )
             );
         };
 
@@ -881,16 +868,31 @@
                         )
                     ),
                     // Iframe do Tour Virtual
-                    React.createElement("div", { className: "flex-1 relative bg-black overflow-hidden" },
-                        React.createElement("iframe", {
-                            src: url,
-                            className: "w-full h-full border-0",
-                            allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; xr-spatial-tracking",
-                            sandbox: "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox",
-                            title: `${titulo} - ${item.name}`,
-                            loading: "lazy",
-                            referrerPolicy: "no-referrer-when-downgrade"
-                        })
+                    canEmbed ? (
+                        React.createElement("div", { className: "flex-1 relative bg-white overflow-hidden" },
+                            React.createElement("iframe", {
+                                src: url,
+                                width: "100%",
+                                height: "100%",
+                                style: { border: 0 },
+                                allowFullscreen: true,
+                                loading: "lazy",
+                                referrerPolicy: "no-referrer-when-downgrade",
+                                title: `Tour Virtual - ${item.name}`
+                            })
+                        )
+                    ) : (
+                        React.createElement("div", { className: "w-full h-full bg-black flex flex-col items-center justify-center p-8 text-center" },
+                            React.createElement("div", { className: "w-20 h-20 mb-6 rounded-2xl bg-orange-500/10 flex items-center justify-center animate-pulse" },
+                                React.createElement("span", { className: "text-4xl" }, "🎯")
+                            ),
+                            React.createElement("h3", { className: "text-2xl font-bold text-white mb-3" }, "Tour Virtual"),
+                            React.createElement("p", { className: "text-gray-400 max-w-sm mb-10 leading-relaxed text-sm md:text-base" }, "Este tour requer abertura em uma nova aba para navegação completa."),
+                            React.createElement("button", {
+                                onClick: handleOpenExternal,
+                                className: "px-10 py-5 bg-orange-600 hover:bg-orange-700 text-white font-black rounded-2xl shadow-[0_10px_40px_rgba(234,88,12,0.3)] transition-all transform hover:scale-105 active:scale-95 uppercase tracking-tighter"
+                            }, "Explorar Tour ↗")
+                        )
                     )
                 )
             );
@@ -900,8 +902,8 @@
         // Formato: { id: 'identificador-unico', embedUrl: 'URL_DO_IFRAME' }
         // O sistema vai mesclar automaticamente com os dados da planilha
         const TOURS_EMBED_MANUAIS = {
-            // Exemplo: 'nome-da-empresa': 'https://www.google.com/maps/embed?pb=...'
-            // Quando a empresa existe na planilha, o embedUrl será mesclado com os dados da planilha
+            // Tours virtuais manuais (serão mesclados com dados da planilha)
+            // Formato: 'Nome da Empresa': 'URL_DO_EMBED'
         };
 
         const FOTOS_360_EMBED_MANUAIS = {
@@ -1200,9 +1202,15 @@
                                             className: `bg-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer ${cores.hover} transition-all group`
                                         },
                                             React.createElement("div", { className: "flex items-start gap-3 p-3" },
-                                                // Thumbnail / Ícone
+                                                // Thumbnail / Ícone Tour 360°
                                                 React.createElement("div", { className: "relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center" },
-                                                    React.createElement("span", { className: "text-3xl" }, "🎯"),
+                                                    // Imagem do ícone Tour 360° (branca)
+                                                    React.createElement("img", { 
+                                                        src: "assets/Design sem nome (1).png", 
+                                                        alt: "Tour 360°",
+                                                        className: "w-14 h-14 object-contain",
+                                                        style: { filter: 'brightness(0) invert(1)' }
+                                                    }),
                                                     // Badge de embeddable
                                                     isEmbeddableUrl && React.createElement("div", { className: "absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full" })
                                                 ),
@@ -1851,11 +1859,30 @@
                                 return foundKey ? (item[foundKey] || "").trim() : "";
                             };
                             // Link da coluna M "Tuor Virtual / Foto 360" (link do Google Maps)
-                            const linkTourOriginal = getVal(['tuor virtual / foto 360', 'tour virtual / foto 360', 'fotos 360 e tour virtual', 'tour virtual', 'link tour']);
+                            let linkTourOriginal = getVal(['tuor virtual / foto 360', 'tour virtual / foto 360', 'fotos 360 e tour virtual', 'tour virtual', 'link tour']);
+                            
+                            // Se o valor contiver um iframe HTML, extrai o src
+                            if (linkTourOriginal && linkTourOriginal.includes('<iframe')) {
+                                const srcMatch = linkTourOriginal.match(/src=["']([^"']+)["']/);
+                                if (srcMatch && srcMatch[1]) {
+                                    linkTourOriginal = srcMatch[1];
+                                }
+                            }
+
+                            // Corrige o nome da empresa se necessário
+                            let empresaName = getVal(['nome da empresa', 'nome', 'name']);
+                            // Correção específica: se o nome for "Câmera 360º" e tiver link360, usa o nome correto da categoria ou keywords
+                            if (empresaName === 'Câmera 360º' || empresaName === 'Camera 360') {
+                                // Tenta pegar o nome correto das keywords ou usa um padrão
+                                const keywordsList = (getVal(['keywords', 'palavras-chave']) || "").split(',').map(k => k.trim()).filter(Boolean);
+                                if (keywordsList.length > 0 && keywordsList[0]) {
+                                    empresaName = keywordsList[0];
+                                }
+                            }
 
                             return {
                                 id: getVal(['id']) || Math.random(),
-                                name: getVal(['nome da empresa', 'nome', 'name']),
+                                name: empresaName,
                                 category: getVal(['categoria', 'category']),
                                 link: getVal(['link perfil google', 'link']) || "N/A",
                                 type: getVal(['serviço google', 'tipo', 'type', 'status']) || "Geral",
