@@ -498,40 +498,36 @@
             );
         };
 
-        // Modal de busca para Sites Personalizados
+        // Modal de Repositório de Sites Personalizados (estilo Tour Virtual)
         const SitesSearchModal = ({ isOpen, onClose, companiesData }) => {
             const [searchTerm, setSearchTerm] = useState('');
-            const [searchResults, setSearchResults] = useState([]);
             const [previewCompany, setPreviewCompany] = useState(null);
+
+            // Apenas empresas com Site Personalizado
+            const sitesPersonalizados = useMemo(() => {
+                return companiesData.filter(c => c.linkSiteSEO && c.linkSiteSEO !== "N/A" && c.linkSiteSEO.trim() !== "");
+            }, [companiesData]);
+
+            // Filtrar por busca
+            const itemsFiltrados = useMemo(() => {
+                if (!searchTerm.trim()) return sitesPersonalizados;
+
+                const term = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                return sitesPersonalizados.filter(item => {
+                    const name = (item.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const category = (item.category || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const kws = (item.keywords || []).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+
+                    return name.includes(term) || category.includes(term) || kws.some(k => k.includes(term));
+                });
+            }, [searchTerm, sitesPersonalizados]);
 
             useEffect(() => {
                 if (!isOpen) {
                     setSearchTerm('');
-                    setSearchResults([]);
                     setPreviewCompany(null);
                 }
             }, [isOpen]);
-
-            const handleSearch = (e) => {
-                const term = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-                setSearchTerm(e.target.value);
-
-                if (term.length > 0) {
-                    // Filtrar apenas empresas que têm link de site personalizado
-                    const filtered = companiesData.filter(company => {
-                        const hasSite = company.linkSiteSEO && company.linkSiteSEO !== "N/A" && company.linkSiteSEO.trim() !== "";
-                        if (!hasSite) return false;
-
-                        const name = (company.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                        const kws = (company.keywords || []).map(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
-
-                        return name.includes(term) || kws.some(k => k.includes(term));
-                    });
-                    setSearchResults(filtered);
-                } else {
-                    setSearchResults([]);
-                }
-            };
 
             const handleSiteClick = (company) => {
                 if (company.linkSiteSEO && company.linkSiteSEO !== "N/A") {
@@ -543,57 +539,127 @@
                 setPreviewCompany(null);
             };
 
+            const getCorClasses = () => ({
+                border: 'border-cyan-500/50',
+                bg: 'bg-cyan-500/10',
+                text: 'text-cyan-400',
+                hover: 'hover:border-cyan-500/50 hover:bg-cyan-500/5'
+            });
+
             if (!isOpen) return null;
 
+            const cores = getCorClasses();
+
             return React.createElement(React.Fragment, null,
-                React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4" },
-                    React.createElement("div", { className: "bg-black p-5 md:p-6 rounded-xl shadow-2xl w-full max-w-lg border border-gray-900" },
-                        React.createElement("div", { className: "flex justify-between items-center mb-4" },
-                            React.createElement("h3", { className: "text-lg md:text-xl font-semibold text-white" }, "🌐 Sites Personalizados"),
-                            React.createElement("button", { onClick: onClose, className: "text-gray-400 hover:text-white" },
-                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5 md:h-6 md:w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[200] p-2 md:p-4" },
+                    React.createElement("div", { className: "bg-black rounded-xl shadow-2xl w-full max-w-5xl h-[95vh] md:h-[90vh] border border-gray-900 flex flex-col" },
+                        // Header
+                        React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-900 bg-black rounded-t-xl" },
+                            React.createElement("div", { className: "flex items-center gap-3" },
+                                React.createElement("div", { className: "w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center" },
+                                    React.createElement("img", { 
+                                        src: "assets/icone-site-personalizado.png", 
+                                        alt: "Sites Personalizados",
+                                        className: "h-7 w-7 object-contain"
+                                    })
+                                ),
+                                React.createElement("div", null,
+                                    React.createElement("h3", { className: "text-lg font-semibold text-white" }, "Sites Personalizados"),
+                                    React.createElement("p", { className: "text-xs text-gray-400" }, `${sitesPersonalizados.length} sites disponíveis`)
+                                )
+                            ),
+                            React.createElement("button", { onClick: onClose, className: "p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" },
+                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                     React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" })
                                 )
                             )
                         ),
-                        React.createElement("div", { className: "mb-4" },
-                            React.createElement("input", {
-                                type: "text",
-                                className: "w-full pl-4 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 transition-all text-sm backdrop-blur-xl",
-                                placeholder: "Buscar por nome ou palavras-chave...",
-                                value: searchTerm,
-                                onChange: handleSearch,
-                                autoFocus: true
-                            })
-                        ),
-                        React.createElement("div", { className: "max-h-80 overflow-y-auto custom-scrollbar" },
-                            searchResults.length > 0 ? (
-                                searchResults.map((company) => (
-                                    React.createElement("div", {
-                                        key: company.id,
-                                        onClick: () => handleSiteClick(company),
-                                        className: "hover:bg-white/5 p-3 rounded-lg cursor-pointer transition-all flex justify-between items-center group border-b border-white/5 last:border-0"
-                                    },
-                                        React.createElement("div", { className: "flex-1" },
-                                            React.createElement("p", { className: "font-semibold text-white group-hover:text-green-400 transition-colors text-sm" }, company.name),
-                                            React.createElement("p", { className: "text-[10px] text-gray-500 mt-1 truncate" }, company.keywords?.slice(0, 3).join(", "))
-                                        ),
-                                        React.createElement("span", { className: "text-green-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg" }, "→")
+                        // Barra de busca
+                        React.createElement("div", { className: "p-4 border-b border-gray-900 bg-black" },
+                            React.createElement("div", { className: "relative" },
+                                React.createElement("input", {
+                                    type: "text",
+                                    className: "w-full pl-10 pr-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all text-sm backdrop-blur-xl",
+                                    placeholder: "Buscar por nome ou palavras-chave...",
+                                    value: searchTerm,
+                                    onChange: (e) => setSearchTerm(e.target.value),
+                                    autoFocus: true
+                                }),
+                                React.createElement("div", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" },
+                                    React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" })
                                     )
-                                ))
-                            ) : searchTerm.length > 0 ? (
-                                React.createElement("div", { className: "p-8 text-center text-mono text-gray-500" }, `Nenhum site encontrado para: ${searchTerm}`)
-                            ) : (
-                                React.createElement("div", { className: "p-6 text-center text-gray-500 text-sm" },
-                                    "Digite o nome do cliente ou palavras-chave para buscar sites personalizados"
                                 )
                             )
                         ),
-                        React.createElement("div", { className: "mt-4 pt-3 border-t border-white/10 flex justify-between items-center" },
-                            React.createElement("span", { className: "text-[10px] text-gray-500" },
-                                `${companiesData.filter(c => c.linkSiteSEO && c.linkSiteSEO !== "N/A" && c.linkSiteSEO.trim() !== "").length} sites disponíveis`
-                            ),
-                            React.createElement("button", { onClick: onClose, className: "text-xs text-gray-400 hover:text-white transition-colors" }, "Fechar")
+                        // Lista de Sites em Cards
+                        React.createElement("div", { className: "flex-1 overflow-y-auto custom-scrollbar p-4" },
+                            itemsFiltrados.length > 0 ? (
+                                React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+                                    itemsFiltrados.map((item, index) => (
+                                        React.createElement("div", {
+                                            key: item.id || index,
+                                            onClick: () => handleSiteClick(item),
+                                            className: `bg-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer ${cores.hover} transition-all group`
+                                        },
+                                            React.createElement("div", { className: "flex items-start gap-3 p-3" },
+                                                // Thumbnail / Ícone Site
+                                                React.createElement("div", { className: "relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center" },
+                                                    React.createElement("img", { 
+                                                        src: "assets/icone-site-personalizado.png", 
+                                                        alt: "Site",
+                                                        className: "w-14 h-14 object-contain"
+                                                    })
+                                                ),
+                                                // Info
+                                                React.createElement("div", { className: "flex-1 min-w-0" },
+                                                    React.createElement("h4", { className: "text-white font-semibold text-sm mb-1 group-hover:text-cyan-400 transition-colors truncate" }, item.name),
+                                                    React.createElement("p", { className: "text-gray-400 text-xs line-clamp-2 mb-2" }, item.category || "Sem categoria"),
+                                                    // Tags/Keywords
+                                                    item.keywords && item.keywords.length > 0 && (
+                                                        React.createElement("div", { className: "flex flex-wrap gap-1" },
+                                                            item.keywords.slice(0, 3).map((kw, i) => (
+                                                                React.createElement("span", { key: i, className: "text-[10px] px-2 py-0.5 bg-white/5 rounded text-gray-500 truncate max-w-[80px]" }, kw)
+                                                            ))
+                                                        )
+                                                    ),
+                                                    // Ação
+                                                    React.createElement("div", { className: "mt-2 flex items-center gap-2" },
+                                                        React.createElement("span", { className: "text-xs text-cyan-400 flex items-center gap-1" },
+                                                            React.createElement("span", null, "Visualizar Site"),
+                                                            React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-3 w-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M15 12a3 3 0 11-6 0 3 3 0 016 0z" }),
+                                                                React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" })
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    ))
+                                )
+                            ) : searchTerm.length > 0 ? (
+                                React.createElement("div", { className: "p-8 text-center" },
+                                    React.createElement("div", { className: "text-4xl mb-4" }, "🔍"),
+                                    React.createElement("p", { className: "text-gray-400" }, `Nenhum resultado encontrado para: "${searchTerm}"`),
+                                    React.createElement("p", { className: "text-gray-600 text-sm mt-2" }, "Tente buscar com outras palavras-chave")
+                                )
+                            ) : (
+                                React.createElement("div", { className: "p-8 text-center" },
+                                    React.createElement("div", { className: "text-4xl mb-4" }, "🌐"),
+                                    React.createElement("p", { className: "text-gray-400" }, `${sitesPersonalizados.length} sites personalizados disponíveis`),
+                                    React.createElement("p", { className: "text-gray-600 text-sm mt-2" }, "Use a busca acima para encontrar um cliente específico")
+                                )
+                            )
+                        ),
+                        // Footer
+                        React.createElement("div", { className: "p-4 border-t border-gray-900 bg-black rounded-b-xl" },
+                            React.createElement("div", { className: "flex justify-between items-center" },
+                                React.createElement("p", { className: "text-center text-gray-500 text-xs" },
+                                    `${itemsFiltrados.length} de ${sitesPersonalizados.length} sites`
+                                ),
+                                React.createElement("button", { onClick: onClose, className: "text-xs text-gray-400 hover:text-white transition-colors px-4 py-2 bg-white/5 rounded-lg" }, "Fechar")
+                            )
                         )
                     )
                 ),
@@ -772,6 +838,33 @@
                                 React.createElement("div", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" },
                                     React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
                                         React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" })
+                                    )
+                                )
+                            )
+                        ),
+                        // Seção de Feedback - Depoimento
+                        React.createElement("div", { className: "p-4 border-b border-gray-900 bg-black" },
+                            React.createElement("div", { className: "bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl p-4" },
+                                React.createElement("div", { className: "flex items-start gap-4" },
+                                    // Ícone de áudio/play
+                                    React.createElement("div", { className: "w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0" },
+                                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-purple-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                            React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" })
+                                        )
+                                    ),
+                                    // Informações do depoimento
+                                    React.createElement("div", { className: "flex-1" },
+                                        React.createElement("h4", { className: "text-white font-semibold text-sm mb-1" }, "💬 Depoimento - Tatiane Gomes"),
+                                        React.createElement("p", { className: "text-gray-400 text-xs mb-3" }, "Expressando a felicidade e dizendo que muitas pessoas estão indo através do link da bio."),
+                                        // Player de áudio
+                                        React.createElement("audio", { 
+                                            controls: true,
+                                            className: "w-full h-8 opacity-80 hover:opacity-100 transition-opacity",
+                                            preload: "metadata"
+                                        },
+                                            React.createElement("source", { src: "assets/depoimento-sobre-link-360.ogg", type: "audio/ogg" }),
+                                            "Seu navegador não suporta o elemento de áudio."
+                                        )
                                     )
                                 )
                             )
@@ -1365,9 +1458,7 @@
             const categorias = {
                 todas: {
                     titulo: 'Todas as Empresas',
-                    icone: React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                        React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" })
-                    ),
+                    icone: React.createElement("img", { src: "https://www.google.com/favicon.ico", alt: "Google", className: "h-5 w-5 opacity-50 grayscale" }),
                     cor: 'blue',
                     filtro: () => true
                 },
@@ -1446,9 +1537,7 @@
                     React.createElement("div", { className: "flex justify-between items-center p-4 border-b border-gray-900 bg-black rounded-t-xl" },
                         React.createElement("div", { className: "flex items-center gap-3" },
                             React.createElement("div", { className: "w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-green-500/20 flex items-center justify-center" },
-                                React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6 text-blue-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                                    React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", d: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" })
-                                )
+                                React.createElement("img", { src: "https://www.google.com/favicon.ico", alt: "Google", className: "h-7 w-7" })
                             ),
                             React.createElement("div", null,
                                 React.createElement("h3", { className: "text-lg font-semibold text-white" }, "Repositório de Empresas"),
@@ -1525,19 +1614,15 @@
                                             // Header do card
                                             React.createElement("div", { className: "flex items-start justify-between mb-2" },
                                                 React.createElement("div", { className: "flex items-center gap-2" },
-                                                    // Badge de tipo
+                                                    // Badge de tipo (apenas borda, sem fundo)
                                                     React.createElement("span", {
-                                                        className: `text-[10px] px-2 py-0.5 rounded-full ${isCriacao ? 'bg-cyan-500/20 text-cyan-400' :
-                                                                isAtualizacao ? 'bg-green-500/20 text-green-400' :
-                                                                    'bg-gray-500/20 text-gray-400'
+                                                        className: `text-[10px] px-2 py-0.5 rounded-full border ${isCriacao ? 'border-cyan-500/50 text-cyan-400' :
+                                                                isAtualizacao ? 'border-green-500/50 text-green-400' :
+                                                                    'border-gray-500/50 text-gray-400'
                                                             }`
                                                     },
                                                         empresa.type || "Geral"
-                                                    ),
-                                                    // Indicador de link disponível
-                                                    empresa.link && empresa.link !== "N/A" && React.createElement("span", {
-                                                        className: "w-2 h-2 bg-green-500 rounded-full"
-                                                    })
+                                                    )
                                                 ),
                                                 React.createElement("span", { className: "text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" }, "→")
                                             ),
@@ -1584,11 +1669,7 @@
                             React.createElement("p", { className: "text-center text-gray-500 text-xs" },
                                 `${empresasBuscadas.length} de ${empresasFiltradas.length} empresas`
                             ),
-                            React.createElement("div", { className: "flex gap-4 text-xs text-gray-500" },
-                                React.createElement("span", { className: "flex items-center gap-1" },
-                                    React.createElement("span", { className: "w-2 h-2 bg-green-500 rounded-full" }),
-                                    "Link disponível"
-                                )
+                            React.createElement("div", { className: "flex gap-4 text-xs text-gray-500" }
                             )
                         )
                     )
@@ -1668,8 +1749,7 @@
                     // Coluna 2: Dashboard de Empresas (Destaque Separado)
                     React.createElement("div", { className: "p-6 glass-panel rounded-2xl border-l-2 border-green-500/50 flex flex-col justify-center relative overflow-hidden group shadow-green-500/5 shadow-2xl" },
                         React.createElement("div", { className: "text-mono mb-4 text-[10px] flex justify-between items-center" },
-                            React.createElement("span", null, "ECOSSISTEMA AG5"),
-                            React.createElement("span", { className: "text-green-500 animate-pulse" }, "● LIVE")
+                            React.createElement("span", null, "ECOSSISTEMA AG5")
                         ),
                         React.createElement("div", { className: "grid grid-cols-2 gap-4" },
                             // Criação - clicável
